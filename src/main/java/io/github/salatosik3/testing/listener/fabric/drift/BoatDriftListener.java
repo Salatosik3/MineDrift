@@ -1,7 +1,9 @@
-package io.github.salatosik3.testing.listener.drift;
+package io.github.salatosik3.testing.listener.fabric.drift;
 
+import io.github.salatosik3.testing.event.ListenerInvoker;
+import io.github.salatosik3.testing.event.data.BoatDriftEvent;
 import io.github.salatosik3.testing.utils.VectorUtils;
-import io.github.salatosik3.testing.listener.EventListener;
+import io.github.salatosik3.testing.listener.fabric.EventListener;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,6 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class BoatDriftListener implements EventListener {
+    private static final double SMALLEST_OPERAPABLE_VALUE = 0e-2d;
     private static final List<EntityType<?>> BOATS = List.of(
             EntityTypes.ACACIA_BOAT,
             EntityTypes.BIRCH_BOAT,
@@ -28,7 +31,12 @@ public class BoatDriftListener implements EventListener {
             EntityTypes.SPRUCE_BOAT
     );
     private final Map<UUID, Vec3> lastVehicleLoc = new HashMap<>();
-    private final double SMALLEST_OPERAPABLE_VALUE = 0e-2d;
+
+    private final ListenerInvoker listenerInvoker;
+
+    public BoatDriftListener(ListenerInvoker listenerInvoker) {
+        this.listenerInvoker = listenerInvoker;
+    }
 
     @Override
     public void register() {
@@ -71,11 +79,7 @@ public class BoatDriftListener implements EventListener {
         }
     }
 
-    private void sendPlayerMessage(ServerPlayer player, String message) {
-        player.sendOverlayMessage(Component.literal(message));
-    }
-
     private void onBoatDrift(ServerPlayer player, Entity boat, Vec3 boatVel, double driftAngle) {
-        sendPlayerMessage(player, "Angle: %.2f".formatted(driftAngle));
+        listenerInvoker.invoke(new BoatDriftEvent(player, boat, boatVel, driftAngle));
     }
 }
