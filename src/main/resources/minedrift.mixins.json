@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "io.github.salatosik3.testing.mixin",
+	"package": "io.github.salatosik3.minedrift.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"ExampleMixin"

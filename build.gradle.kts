@@ -18,7 +18,7 @@ loom {
 	splitEnvironmentSourceSets()
 
 	mods {
-		register("amogustesting") {
+		register("minedrift") {
 			sourceSet(sourceSets.main.get())
 			sourceSet(sourceSets.getByName("client"))
 		}

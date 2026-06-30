@@ -1,4 +1,4 @@
-package io.github.salatosik3.testing.utils;
+package io.github.salatosik3.minedrift.utils;
 
 import net.minecraft.world.phys.Vec3;
 

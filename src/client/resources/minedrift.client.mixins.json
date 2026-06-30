@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "io.github.salatosik3.testing.client.mixin",
+	"package": "io.github.salatosik3.minedrift.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"ExampleClientMixin"

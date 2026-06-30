@@ -1,7 +1,7 @@
-package io.github.salatosik3.testing.listener.fabric;
+package io.github.salatosik3.minedrift.listener.fabric;
 
-import io.github.salatosik3.testing.event.EventBus;
-import io.github.salatosik3.testing.listener.fabric.drift.BoatDriftListener;
+import io.github.salatosik3.minedrift.event.EventBus;
+import io.github.salatosik3.minedrift.listener.fabric.drift.BoatDriftListener;
 
 import java.util.ArrayList;
 import java.util.List;

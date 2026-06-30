@@ -16,16 +16,16 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"io.github.salatosik3.testing.AmogusTesting"
+          "io.github.salatosik3.minedrift.MineDrift"
 		],
 		"client": [
-			"io.github.salatosik3.testing.client.AmogusTestingClient"
+			"io.github.salatosik3.minedrift.client.MineDriftClient"
 		]
 	},
 	"mixins": [
-		"amogustesting.mixins.json",
+		"minedrift.mixins.json",
 		{
-			"config": "amogustesting.client.mixins.json",
+			"config": "minedrift.client.mixins.json",
 			"environment": "client"
 		}
 	],

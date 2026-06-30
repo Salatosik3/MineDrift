@@ -1,11 +1,10 @@
-package io.github.salatosik3.testing.listener.fabric.drift;
+package io.github.salatosik3.minedrift.listener.fabric.drift;
 
-import io.github.salatosik3.testing.event.ListenerInvoker;
-import io.github.salatosik3.testing.event.data.BoatDriftEvent;
-import io.github.salatosik3.testing.utils.VectorUtils;
-import io.github.salatosik3.testing.listener.fabric.EventListener;
+import io.github.salatosik3.minedrift.event.ListenerInvoker;
+import io.github.salatosik3.minedrift.event.data.BoatDriftEvent;
+import io.github.salatosik3.minedrift.utils.VectorUtils;
+import io.github.salatosik3.minedrift.listener.fabric.EventListener;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;

@@ -1,4 +1,4 @@
-package io.github.salatosik3.testing.client.mixin;
+package io.github.salatosik3.minedrift.client.mixin;
 
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;

@@ -1,7 +1,7 @@
-package io.github.salatosik3.testing.listener.bus;
+package io.github.salatosik3.minedrift.listener.bus;
 
-import io.github.salatosik3.testing.event.EventListenerRegistrar;
-import io.github.salatosik3.testing.event.data.BoatDriftEvent;
+import io.github.salatosik3.minedrift.event.EventListenerRegistrar;
+import io.github.salatosik3.minedrift.event.data.BoatDriftEvent;
 
 public class BusEventListenerManager {
     private final EventListenerRegistrar registrar;
