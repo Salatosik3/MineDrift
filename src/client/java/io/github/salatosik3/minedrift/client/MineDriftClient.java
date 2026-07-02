@@ -2,12 +2,10 @@ package io.github.salatosik3.minedrift.client;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ItemLike;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +13,8 @@ public class MineDriftClient implements ClientModInitializer {
 	public static final String MOD_ID = "minedrift";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	private float rotation = 0;
+	private long lastRenderTime = 0;
+	private int angleDegrees = 0;
 
 	@Override
 	public void onInitializeClient() {
@@ -25,23 +24,38 @@ public class MineDriftClient implements ClientModInitializer {
 
 			var pose = graphics.pose();
 			pose.pushMatrix();
-
-//			graphics.textRenderer().accept(graphics.guiWidth() / 2, graphics.guiHeight() / 2, Component.literal(String.valueOf(deltaTracker.getGameTimeDeltaPartialTick(true))));
-//			graphics.textRenderer().accept(graphics.guiWidth() / 2, graphics.guiHeight() / 2, Component.literal("Go fuck yourself."));
-
-			var centerX = graphics.guiWidth() / 2;
-			var centerY = graphics.guiHeight() / 2;
-
-			pose.translate(centerX, centerY);
-
-			rotation += 0.01f;
-			pose.rotate(rotation);
-
-//			pose.scale(2, 2);
-
-			graphics.fakeItem(new ItemStack(Items.ACACIA_BOAT, 1), 0, 0);
+			renderDriftText(graphics, deltaTracker);
 			pose.popMatrix();
 		});
 
+	}
+
+	private void renderDriftText(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
+		var newRenderTime = System.currentTimeMillis();
+		var renderDelay = newRenderTime - lastRenderTime;
+		lastRenderTime = newRenderTime;
+
+//		if (renderDelay <= 50) {
+//			return;
+//		}
+
+		angleDegrees++;
+		angleDegrees %= 360;
+
+		float sw = graphics.guiWidth();
+		float sh = graphics.guiHeight();
+		var pose = graphics.pose();
+
+		float offsetOfBorder = 0.05f; // How far from the border of HUD in percentage
+		pose.translate(sw * offsetOfBorder, sh * offsetOfBorder);
+
+		pose.rotate(45);
+		float scaleFactor = (float) Math.abs(Math.cos(Math.toRadians(angleDegrees) * 1));
+		float maxScaleSize = 1;
+		float floorSize = 2;
+		pose.scale(maxScaleSize * scaleFactor + floorSize);
+
+		var textGraphics = graphics.textRenderer();
+		textGraphics.accept(0, 0, Component.literal("Test!"));
 	}
 }
