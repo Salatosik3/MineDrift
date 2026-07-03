@@ -1,5 +1,7 @@
 package io.github.salatosik3.minedrift.client;
 
+import com.mojang.authlib.minecraft.client.MinecraftClient;
+import io.github.salatosik3.minedrift.client.animation.Interpolation;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.DeltaTracker;
@@ -15,6 +17,7 @@ public class MineDriftClient implements ClientModInitializer {
 
 	private long lastRenderTime = 0;
 	private int angleDegrees = 0;
+	private Interpolation interpolation = new Interpolation(0, 1, 10000);
 
 	@Override
 	public void onInitializeClient() {
@@ -35,6 +38,8 @@ public class MineDriftClient implements ClientModInitializer {
 		var renderDelay = newRenderTime - lastRenderTime;
 		lastRenderTime = newRenderTime;
 
+
+
 //		if (renderDelay <= 50) {
 //			return;
 //		}
@@ -50,7 +55,8 @@ public class MineDriftClient implements ClientModInitializer {
 		pose.translate(sw * offsetOfBorder, sh * offsetOfBorder);
 
 		pose.rotate(45);
-		float scaleFactor = (float) Math.abs(Math.cos(Math.toRadians(angleDegrees) * 1));
+//		float scaleFactor = (float) Math.abs(Math.cos(Math.toRadians(angleDegrees) * 1));
+		float scaleFactor = (float) interpolation.get();
 		float maxScaleSize = 1;
 		float floorSize = 2;
 		pose.scale(maxScaleSize * scaleFactor + floorSize);
