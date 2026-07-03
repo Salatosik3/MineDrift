@@ -1,5 +1,6 @@
 package io.github.salatosik3.minedrift.client.animation;
 
+// TODO I think it would be a great idea to optimize this and add a new class called "InterpolationSequence" or something that will give me ability to make really good things with it I think.
 public class Interpolation {
 
     private final Type interpolationType;
