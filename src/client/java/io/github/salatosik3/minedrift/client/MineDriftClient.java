@@ -17,7 +17,7 @@ public class MineDriftClient implements ClientModInitializer {
 
 	private long lastRenderTime = 0;
 	private int angleDegrees = 0;
-	private Interpolation interpolation = new Interpolation(0, 1, 10000);
+	private Interpolation interpolation = new Interpolation(Interpolation.Type.EASE_IN_OUT, 1000);
 
 	@Override
 	public void onInitializeClient() {
