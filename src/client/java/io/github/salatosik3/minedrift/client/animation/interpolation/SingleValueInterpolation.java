@@ -15,7 +15,7 @@ public class SingleValueInterpolation implements Interpolation<Double> {
     private boolean reversing = false;
     private boolean stopped = false;
 
-    private boolean innerClock = false;
+    private boolean innerClock;
 
     public SingleValueInterpolation(Clock clock, Type type, double minVal, double maxVal, long timeToComplete, Mode mode) {
         this.clock = clock;
