@@ -29,6 +29,10 @@ public class SingleValueInterpolation implements Interpolation<Double> {
     }
 
     public Double compute() {
+        if (!clock.isStarted()) { // Idk who might have responsibility for this because the clock can be created either inside class or outside.
+            clock.start();
+        }
+
         if (stopped) {
             return type.getFunc().interpolate(minVal, maxVal, (double) accumulatedTime / timeToComplete);
         }

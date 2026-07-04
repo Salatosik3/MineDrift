@@ -1,6 +1,8 @@
 package io.github.salatosik3.minedrift.client;
 
+import io.github.salatosik3.minedrift.client.animation.interpolation.Mode;
 import io.github.salatosik3.minedrift.client.animation.interpolation.SingleValueInterpolation;
+import io.github.salatosik3.minedrift.client.animation.interpolation.Type;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.DeltaTracker;
@@ -16,7 +18,7 @@ public class MineDriftClient implements ClientModInitializer {
 
 	private long lastRenderTime = System.currentTimeMillis();
 	private int angleDegrees = 0;
-	private SingleValueInterpolation interpolation = new SingleValueInterpolation(SingleValueInterpolation.Type.EASE_IN_OUT, 0, 1, 4000, SingleValueInterpolation.Mode.CYCLE);
+	private SingleValueInterpolation interpolation = new SingleValueInterpolation(Type.EASE_IN_OUT, 0, 1, 4000, Mode.CYCLE);
 
 	@Override
 	public void onInitializeClient() {
@@ -38,8 +40,8 @@ public class MineDriftClient implements ClientModInitializer {
 		var newTime = System.currentTimeMillis();
 		var del = newTime - lastRenderTime;
 
-		interpolation.setMode(SingleValueInterpolation.Mode.STOP_WHEN_END);
-		interpolation.setType(SingleValueInterpolation.Type.EASE_IN_OUT);
+		interpolation.setMode(Mode.STOP_WHEN_END);
+		interpolation.setType(Type.EASE_IN_OUT);
 
 		angleDegrees++;
 		angleDegrees %= 360;
@@ -52,7 +54,7 @@ public class MineDriftClient implements ClientModInitializer {
 		pose.translate(sw * offsetOfBorder, sh * offsetOfBorder);
 
 		pose.rotate(45);
-		float scaleFactor = (float) interpolation.compute();
+		float scaleFactor = (float) (double) interpolation.compute();
 		float maxScaleSize = 1;
 		float floorSize = 1;
 		pose.scale(maxScaleSize * scaleFactor + floorSize);
