@@ -15,6 +15,8 @@ public class SingleValueInterpolation implements Interpolation<Double> {
     private boolean reversing = false;
     private boolean stopped = false;
 
+    private boolean innerClock = false;
+
     public SingleValueInterpolation(Clock clock, Type type, double minVal, double maxVal, long timeToComplete, Mode mode) {
         this.clock = clock;
         this.type = type;
@@ -22,14 +24,17 @@ public class SingleValueInterpolation implements Interpolation<Double> {
         this.maxVal = maxVal;
         this.timeToComplete = timeToComplete;
         this.mode = mode;
+
+        this.innerClock = false;
     }
 
     public SingleValueInterpolation(Type type, double minVal, double maxVal, long timeToComplete, Mode mode) {
         this(new Clock(), type, minVal, maxVal, timeToComplete, mode);
+        this.innerClock = true;
     }
 
     public Double compute() {
-        if (!clock.isStarted()) { // Idk who might have responsibility for this because the clock can be created either inside class or outside.
+        if (innerClock && !clock.isStarted()) { // I'm not sure if this is a good idea, but looks like it gonna be okay
             clock.start();
         }
 
