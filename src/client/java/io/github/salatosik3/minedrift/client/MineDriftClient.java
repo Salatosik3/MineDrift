@@ -1,6 +1,5 @@
 package io.github.salatosik3.minedrift.client;
 
-import com.mojang.authlib.minecraft.client.MinecraftClient;
 import io.github.salatosik3.minedrift.client.animation.Interpolation;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -17,7 +16,7 @@ public class MineDriftClient implements ClientModInitializer {
 
 	private long lastRenderTime = 0;
 	private int angleDegrees = 0;
-	private Interpolation interpolation = new Interpolation(Interpolation.Type.EASE_IN_OUT, 1000);
+	private Interpolation interpolation = new Interpolation(Interpolation.Type.EASE_IN_OUT, 0, 1, 1000, false);
 
 	@Override
 	public void onInitializeClient() {
@@ -34,15 +33,8 @@ public class MineDriftClient implements ClientModInitializer {
 	}
 
 	private void renderDriftText(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
-		var newRenderTime = System.currentTimeMillis();
-		var renderDelay = newRenderTime - lastRenderTime;
-		lastRenderTime = newRenderTime;
-
-
-
-//		if (renderDelay <= 50) {
-//			return;
-//		}
+		interpolation.setReverseOnEnd(true);
+		interpolation.setInterpolationType(Interpolation.Type.EASE_IN_OUT);
 
 		angleDegrees++;
 		angleDegrees %= 360;
@@ -55,13 +47,12 @@ public class MineDriftClient implements ClientModInitializer {
 		pose.translate(sw * offsetOfBorder, sh * offsetOfBorder);
 
 		pose.rotate(45);
-//		float scaleFactor = (float) Math.abs(Math.cos(Math.toRadians(angleDegrees) * 1));
-		float scaleFactor = (float) interpolation.get();
+		float scaleFactor = (float) interpolation.compute();
 		float maxScaleSize = 1;
-		float floorSize = 10;
+		float floorSize = 1;
 		pose.scale(maxScaleSize * scaleFactor + floorSize);
 
 		var textGraphics = graphics.textRenderer();
-		textGraphics.accept(0, 0, Component.literal("Я твой рот ебал."));
+		textGraphics.accept(0, 0, Component.literal(String.valueOf(scaleFactor)));
 	}
 }

@@ -1,54 +1,106 @@
 package io.github.salatosik3.minedrift.client.animation;
 
-// TODO I think it would be a great idea to optimize this and add a new class called "InterpolationSequence" or something that will give me ability to make really good things with it I think.
 public class Interpolation {
 
-    private final Type interpolationType;
-    private final double minVal;
-    private final double maxVal;
-    private final long timeToComplete;
+    private final Clock clock;
+    private Type interpolationType;
+    private double minVal;
+    private double maxVal;
+    private long timeToComplete;
+    private boolean reverseOnEnd;
 
-    private long lastTime = 0;
     private long accumulatedTime = 0;
     private boolean reversing = false;
 
-    public Interpolation(Type interpolationType, double minVal, double maxVal, long timeToComplete) {
+    public Interpolation(Clock clock, Type interpolationType, double minVal, double maxVal, long timeToComplete, boolean reverseOnEnd) {
+        this.clock = clock;
         this.interpolationType = interpolationType;
         this.minVal = minVal;
         this.maxVal = maxVal;
         this.timeToComplete = timeToComplete;
+        this.reverseOnEnd = reverseOnEnd;
     }
 
-    public Interpolation(Type interpolationType, long timeToComplete) {
-        this(interpolationType, 0, 1, timeToComplete);
+    public Interpolation(Type interpolationType, double minVal, double maxVal, long timeToComplete, boolean reverseOnEnd) {
+        this(new Clock(), interpolationType, minVal, maxVal, timeToComplete, reverseOnEnd);
     }
 
-    public double get() {
-        long newTime = System.currentTimeMillis();
-        long delay = newTime - (lastTime == 0 ? newTime : lastTime);
-        lastTime = newTime;
-
-        double actualTimeToComplete = timeToComplete;
-        accumulatedTime += reversing ? -delay : delay;
-
-        if (reversing && accumulatedTime < 0) {
-            reversing = false;
-            accumulatedTime = 0;
-        } else if (!reversing && accumulatedTime > actualTimeToComplete) {
-            reversing = true;
+    public double compute() {
+        if (!clock.isStarted()) { // Ummm, idk who has responsibility for starting the clock, so I just leave it like this, maybe it will cause problems in the future, maybe not
+            clock.start();
         }
 
-        return interpolationType.interpolationFunction.interpolate(minVal, maxVal, (accumulatedTime / actualTimeToComplete));
+        long delay = clock.getDelay();
+        accumulatedTime += reversing ? -delay : delay;
+
+        if (accumulatedTime > timeToComplete) {
+            if (reverseOnEnd) {
+                reversing = true;
+                accumulatedTime = timeToComplete;
+            } else {
+                reversing = false;
+                accumulatedTime = 0;
+            }
+        } else if (accumulatedTime < 0) {
+            accumulatedTime = 0;
+            reversing = false;
+        }
+
+        return interpolationType.func.interpolate(minVal, maxVal, (double) accumulatedTime / timeToComplete);
+    }
+
+    public Clock getClock() {
+        return clock;
+    }
+
+    public Type getInterpolationType() {
+        return interpolationType;
+    }
+
+    public void setInterpolationType(Type interpolationType) {
+        this.interpolationType = interpolationType;
+    }
+
+    public double getMinVal() {
+        return minVal;
+    }
+
+    public void setMinVal(double minVal) {
+        this.minVal = minVal;
+    }
+
+    public double getMaxVal() {
+        return maxVal;
+    }
+
+    public void setMaxVal(double maxVal) {
+        this.maxVal = maxVal;
+    }
+
+    public long getTimeToComplete() {
+        return timeToComplete;
+    }
+
+    public void setTimeToComplete(long timeToComplete) {
+        this.timeToComplete = timeToComplete;
+    }
+
+    public void setReverseOnEnd(boolean reverseOnEnd) {
+        this.reverseOnEnd = reverseOnEnd;
+    }
+
+    public boolean isReverseOnEnd() {
+        return reverseOnEnd;
     }
 
     public enum Type {
         LINEAR((a, b, t) -> a + (b - a) * t),
-        EASE_IN_OUT((a, b, t) -> a - (b - a) * t * t * (3 - 2 * t));
+        EASE_IN_OUT((a, b, t) -> a + (b - a) * t * t * (3 - 2 * t));
 
-        private final InterpolationFunc interpolationFunction;
+        private final InterpolationFunc func;
 
-        Type(InterpolationFunc interpolationFunction) {
-            this.interpolationFunction = interpolationFunction;
+        Type(InterpolationFunc func) {
+            this.func = func;
         }
     }
 
