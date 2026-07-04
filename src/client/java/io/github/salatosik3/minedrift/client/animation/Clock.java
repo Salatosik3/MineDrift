@@ -42,7 +42,7 @@ public class Clock {
     // delay since last method call, so it actually returns amount of time that has been passed since first method call (or start method call)
     public long getDelay() {
         if (!started) {
-            throw new IllegalStateException("The clock should be started.");
+            return 0;
         }
         long currentTime = getCurrentTime();
         long delay = currentTime - lastTimeValue;

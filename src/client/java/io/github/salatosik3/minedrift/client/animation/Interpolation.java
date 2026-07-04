@@ -7,39 +7,47 @@ public class Interpolation {
     private double minVal;
     private double maxVal;
     private long timeToComplete;
-    private boolean reverseOnEnd;
+    private Mode mode;
 
     private long accumulatedTime = 0;
     private boolean reversing = false;
+    private boolean stopped = false;
 
-    public Interpolation(Clock clock, Type interpolationType, double minVal, double maxVal, long timeToComplete, boolean reverseOnEnd) {
+    public Interpolation(Clock clock, Type interpolationType, double minVal, double maxVal, long timeToComplete, Mode mode) {
         this.clock = clock;
         this.interpolationType = interpolationType;
         this.minVal = minVal;
         this.maxVal = maxVal;
         this.timeToComplete = timeToComplete;
-        this.reverseOnEnd = reverseOnEnd;
+        this.mode = mode;
     }
 
-    public Interpolation(Type interpolationType, double minVal, double maxVal, long timeToComplete, boolean reverseOnEnd) {
-        this(new Clock(), interpolationType, minVal, maxVal, timeToComplete, reverseOnEnd);
+    public Interpolation(Type interpolationType, double minVal, double maxVal, long timeToComplete, Mode mode) {
+        this(new Clock(), interpolationType, minVal, maxVal, timeToComplete, mode);
     }
 
     public double compute() {
-        if (!clock.isStarted()) { // Ummm, idk who has responsibility for starting the clock, so I just leave it like this, maybe it will cause problems in the future, maybe not
-            clock.start();
+        if (stopped) {
+            return interpolationType.func.interpolate(minVal, maxVal, (double) accumulatedTime / timeToComplete);
         }
 
         long delay = clock.getDelay();
         accumulatedTime += reversing ? -delay : delay;
 
         if (accumulatedTime > timeToComplete) {
-            if (reverseOnEnd) {
-                reversing = true;
-                accumulatedTime = timeToComplete;
-            } else {
-                reversing = false;
-                accumulatedTime = 0;
+            switch (mode) {
+                case REVERSING_CYCLE -> {
+                    reversing = true;
+                    accumulatedTime = timeToComplete;
+                }
+                case CYCLE -> {
+                    reversing = false;
+                    accumulatedTime = 0;
+                }
+                case STOP_WHEN_END -> {
+                    stopped = true;
+                    accumulatedTime = timeToComplete;
+                }
             }
         } else if (accumulatedTime < 0) {
             accumulatedTime = 0;
@@ -47,6 +55,16 @@ public class Interpolation {
         }
 
         return interpolationType.func.interpolate(minVal, maxVal, (double) accumulatedTime / timeToComplete);
+    }
+
+    public void stop() {
+        this.stopped = true;
+    }
+
+    public void reset() {
+        accumulatedTime = 0;
+        stopped = false;
+        reversing = false;
     }
 
     public Clock getClock() {
@@ -57,40 +75,44 @@ public class Interpolation {
         return interpolationType;
     }
 
-    public void setInterpolationType(Type interpolationType) {
-        this.interpolationType = interpolationType;
-    }
-
     public double getMinVal() {
         return minVal;
-    }
-
-    public void setMinVal(double minVal) {
-        this.minVal = minVal;
     }
 
     public double getMaxVal() {
         return maxVal;
     }
 
-    public void setMaxVal(double maxVal) {
-        this.maxVal = maxVal;
-    }
-
     public long getTimeToComplete() {
         return timeToComplete;
+    }
+
+    public Mode getMode() {
+        return mode;
+    }
+
+    public boolean isStopped() {
+        return stopped;
+    }
+
+    public void setInterpolationType(Type interpolationType) {
+        this.interpolationType = interpolationType;
+    }
+
+    public void setMinVal(double minVal) {
+        this.minVal = minVal;
+    }
+
+    public void setMaxVal(double maxVal) {
+        this.maxVal = maxVal;
     }
 
     public void setTimeToComplete(long timeToComplete) {
         this.timeToComplete = timeToComplete;
     }
 
-    public void setReverseOnEnd(boolean reverseOnEnd) {
-        this.reverseOnEnd = reverseOnEnd;
-    }
-
-    public boolean isReverseOnEnd() {
-        return reverseOnEnd;
+    public void setMode(Mode mode) {
+        this.mode = mode;
     }
 
     public enum Type {
@@ -107,5 +129,9 @@ public class Interpolation {
     @FunctionalInterface
     public interface InterpolationFunc {
         double interpolate(double a, double b, double t);
+    }
+
+    public enum Mode {
+        STOP_WHEN_END, CYCLE, REVERSING_CYCLE
     }
 }

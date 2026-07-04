@@ -1,5 +1,6 @@
 package io.github.salatosik3.minedrift.client;
 
+import io.github.salatosik3.minedrift.client.animation.Clock;
 import io.github.salatosik3.minedrift.client.animation.Interpolation;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -14,9 +15,9 @@ public class MineDriftClient implements ClientModInitializer {
 	public static final String MOD_ID = "minedrift";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	private long lastRenderTime = 0;
+	private long lastRenderTime = System.currentTimeMillis();
 	private int angleDegrees = 0;
-	private Interpolation interpolation = new Interpolation(Interpolation.Type.EASE_IN_OUT, 0, 1, 1000, false);
+	private Interpolation interpolation = new Interpolation(Interpolation.Type.EASE_IN_OUT, 0, 1, 4000, Interpolation.Mode.CYCLE);
 
 	@Override
 	public void onInitializeClient() {
@@ -30,10 +31,16 @@ public class MineDriftClient implements ClientModInitializer {
 			pose.popMatrix();
 		});
 
+
+
 	}
 
 	private void renderDriftText(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
-		interpolation.setReverseOnEnd(true);
+		var newTime = System.currentTimeMillis();
+		var del = newTime - lastRenderTime;
+
+
+		interpolation.setMode(Interpolation.Mode.STOP_WHEN_END);
 		interpolation.setInterpolationType(Interpolation.Type.EASE_IN_OUT);
 
 		angleDegrees++;
@@ -54,5 +61,10 @@ public class MineDriftClient implements ClientModInitializer {
 
 		var textGraphics = graphics.textRenderer();
 		textGraphics.accept(0, 0, Component.literal(String.valueOf(scaleFactor)));
+
+		if (del > 2000) {
+			lastRenderTime = newTime;
+			interpolation.reset();
+		}
 	}
 }
