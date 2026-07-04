@@ -58,10 +58,10 @@ public class MineDriftClient implements ClientModInitializer {
 //		float scaleFactor = (float) Math.abs(Math.cos(Math.toRadians(angleDegrees) * 1));
 		float scaleFactor = (float) interpolation.get();
 		float maxScaleSize = 1;
-		float floorSize = 2;
+		float floorSize = 10;
 		pose.scale(maxScaleSize * scaleFactor + floorSize);
 
 		var textGraphics = graphics.textRenderer();
-		textGraphics.accept(0, 0, Component.literal("Test!"));
+		textGraphics.accept(0, 0, Component.literal("Я твой рот ебал."));
 	}
 }
