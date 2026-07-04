@@ -90,7 +90,7 @@ public class SingleValueInterpolation implements Interpolation<Double> {
     }
 
     @Override
-    public void setMaxValue(Double maxVal) {
+    public void setMaxVal(Double maxVal) {
         this.maxVal = maxVal;
     }
 

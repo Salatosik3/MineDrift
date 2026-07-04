@@ -17,7 +17,7 @@ public interface Interpolation <T> {
 
     T getMaxVal();
 
-    void setMaxValue(T maxValue);
+    void setMaxVal(T maxValue);
 
     long getTimeToComplete();
 
