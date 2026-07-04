@@ -1,7 +1,7 @@
 package io.github.salatosik3.minedrift.client.animation;
 
 public class Clock {
-    private double speed; // TODO I'm not sure about this idea, because it will work not good with short range interpolations...
+    private double speed;
     private boolean started = false;
     private long lastTimeValue = 0;
 
