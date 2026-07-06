@@ -1,5 +1,7 @@
 package io.github.salatosik3.minedrift.client.animation.interpolation;
 
+import java.util.function.Consumer;
+
 public interface Interpolation <T> {
     T get();
 
@@ -14,4 +16,6 @@ public interface Interpolation <T> {
     InterpolationType getType();
 
     void setType(InterpolationType type);
+
+    void addOnEndCallback(Consumer<Interpolation<T>> callback);
 }

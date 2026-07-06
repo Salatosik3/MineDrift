@@ -1,8 +1,7 @@
 package io.github.salatosik3.minedrift.client;
 
-import io.github.salatosik3.minedrift.client.animation.interpolation.Mode;
-import io.github.salatosik3.minedrift.client.animation.interpolation.SingleValueInterpolation;
-import io.github.salatosik3.minedrift.client.animation.interpolation.Type;
+import io.github.salatosik3.minedrift.client.animation.Clock;
+import io.github.salatosik3.minedrift.client.animation.interpolation.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.DeltaTracker;
@@ -18,10 +17,15 @@ public class MineDriftClient implements ClientModInitializer {
 
 	private long lastRenderTime = System.currentTimeMillis();
 	private int angleDegrees = 0;
-	private SingleValueInterpolation interpolation = new SingleValueInterpolation(Type.EASE_IN_OUT, 0, 1, 4000, Mode.CYCLE);
+	private Interpolation<Float> interpolation;
 
 	@Override
 	public void onInitializeClient() {
+		var commonInterpolation = new FloatInterpolation(InterpolationType.LINEAR, 0f, 1f, 30000);
+//		commonInterpolation.addOnEndCallback(interpolation -> interpolation.setReverse(!interpolation.isReverse()));
+//		interpolation = new RepetitiveInterpolation<>(commonInterpolation, -1);
+
+		interpolation = commonInterpolation;
 
 		HudElementRegistry.addFirst(Identifier.fromNamespaceAndPath(MOD_ID, "trying_to_figure_it_out"),
 				(graphics, deltaTracker) -> {
@@ -40,8 +44,12 @@ public class MineDriftClient implements ClientModInitializer {
 		var newTime = System.currentTimeMillis();
 		var del = newTime - lastRenderTime;
 
-		interpolation.setMode(Mode.STOP_WHEN_END);
-		interpolation.setType(Type.EASE_IN_OUT);
+		if (del < 500) {
+//			return;
+
+		} else {
+			lastRenderTime = newTime;
+		}
 
 		angleDegrees++;
 		angleDegrees %= 360;
@@ -54,17 +62,16 @@ public class MineDriftClient implements ClientModInitializer {
 		pose.translate(sw * offsetOfBorder, sh * offsetOfBorder);
 
 		pose.rotate(45);
-		float scaleFactor = (float) (double) interpolation.compute();
-		float maxScaleSize = 1;
+		float scaleFactor = interpolation.get();
+		float maxScaleSize = 2;
 		float floorSize = 1;
 		pose.scale(maxScaleSize * scaleFactor + floorSize);
 
 		var textGraphics = graphics.textRenderer();
-		textGraphics.accept(0, 0, Component.literal(String.valueOf(scaleFactor)));
+		textGraphics.accept(0, 0, Component.literal(String.valueOf(scaleFactor) + ": " + String.valueOf(interpolation.isEnded())));
 
-		if (del > 2000) {
-			lastRenderTime = newTime;
-			interpolation.reset();
-		}
+//		if (interpolation.isEnded()) {
+//			interpolation.restart();
+//		}
 	}
 }

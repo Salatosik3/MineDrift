@@ -7,6 +7,10 @@ public class FloatInterpolation extends AbstractInterpolation<Float> {
         super(type, clock, min, max, duration);
     }
 
+    public FloatInterpolation(InterpolationType type, Float min, Float max, long duration) {
+        super(type, min, max, duration);
+    }
+
     @Override
     protected Float compute(Float a, Float b, double t) {
         return super.type.getFunc().calculate(a, b, t).floatValue();

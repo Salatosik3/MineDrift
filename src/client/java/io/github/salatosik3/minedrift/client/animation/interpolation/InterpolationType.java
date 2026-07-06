@@ -1,8 +1,9 @@
 package io.github.salatosik3.minedrift.client.animation.interpolation;
 
+// Weirdest thing that I have ever did. TODO I have to delete this shit because it gonna be so tired when I will try to add more complicated things...
 public enum InterpolationType {
-    LINEAR((a, b, t) -> sum(a, mul(sub(b, a), t))), // a + (b - a) * t)
-    EASE_IN_OUT((a, b, t) -> sum(a, mul(mul(mul(sub(b, a), t), t), 3 - 2 * t))); // a + (b - a) * t * t * (3 - 2 * t)
+    LINEAR((a, b, t) -> sum(a, mulByT(sub(b, a), t))), // a + (t - a) * t)
+    EASE_IN_OUT((a, b, t) -> sum(a, mulByT(mulByT(mulByT(sub(b, a), t), t), 3 - 2 * t))); // a + (t - a) * t * t * (3 - 2 * t)
 
     private final InterpolationFunction<? super Number> func;
 
@@ -16,7 +17,7 @@ public enum InterpolationType {
 
     private static Number sum(Number a, Number b) {
         if (!a.getClass().equals(b.getClass())) {
-            throw new IllegalArgumentException("Both arguments have to have the same types!");
+            throw new IllegalArgumentException("Both arguments have to have the same types! Classes: %s and %s".formatted(a.getClass().getName(), b.getClass().getName()));
         }
 
         if (a instanceof Float af && b instanceof Float bf) {
@@ -58,21 +59,17 @@ public enum InterpolationType {
         }
     }
 
-    private static Number mul(Number a, double b) {
+    private static Number mulByT(Number a, double t) {
         if (a instanceof Float af) {
-            return af - b;
+            return (float) (af * t);
         } else if (a instanceof Double ad) {
-            return ad - b;
-        } else if (a instanceof Byte ab) {
-            return ab - b;
-        } else if (a instanceof Short as) {
-            return as - b;
+            return ad * t;
         } else if (a instanceof Integer ai) {
-            return ai - b;
+            return ai * t;
         } else if (a instanceof Long al) {
-            return al - b;
+            return al * t;
         } else {
-            throw new IllegalArgumentException("No implementation for %s".formatted(a.getClass().getName()));
+            throw new IllegalArgumentException("%s is unsupported".formatted(a.getClass().getName()));
         }
     }
 

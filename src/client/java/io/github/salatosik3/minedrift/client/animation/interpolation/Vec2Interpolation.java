@@ -9,6 +9,10 @@ public class Vec2Interpolation extends AbstractInterpolation<Vec2> {
         super(type, clock, min, max, duration);
     }
 
+    public Vec2Interpolation(InterpolationType type, Vec2 min, Vec2 max, long duration) {
+        super(type, min, max, duration);
+    }
+
     @Override
     protected Vec2 compute(Vec2 a, Vec2 b, double t) {
         return new Vec2(type.getFunc().calculate(a.x, b.x, t).floatValue(),
