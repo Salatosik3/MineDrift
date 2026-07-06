@@ -13,6 +13,9 @@ public class FloatInterpolation extends AbstractInterpolation<Float> {
 
     @Override
     protected Float compute(Float a, Float b, double t) {
-        return super.type.getFunc().calculate(a, b, t).floatValue();
+        return (float) switch(type) {
+            case LINEAR -> a + (b - a) * t;
+            case EASE_IN_OUT -> a + (b - a) * t * t * (3 - 2 * t);
+        };
     }
 }

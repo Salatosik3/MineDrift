@@ -37,41 +37,6 @@ public abstract class AbstractInterpolation <T> implements Interpolation<T> {
     }
 
     @Override
-    public T get() {
-        if (!clock.isStarted() && selfCreatedClock) {
-            clock.start();
-        }
-
-        if (ended) {
-            return reverse ? min : max;
-        }
-
-        long delay = clock.getDelay();
-        acumulatedTime += reverse ? -delay : delay;
-
-        boolean moreThanDuration = acumulatedTime > duration;
-        boolean lessThanZero = acumulatedTime < 0;
-
-        if (moreThanDuration || lessThanZero) {
-            if (selfCreatedClock) {
-                clock.stop();
-            }
-
-            if (moreThanDuration) acumulatedTime = duration;
-            else acumulatedTime = 0;
-        }
-
-        return compute(min, max, (double) acumulatedTime / duration);
-    }
-
-    protected abstract T compute(T a, T b, double t);
-
-    @Override
-    public void addOnEndCallback(Consumer<Interpolation<T>> callback) {
-        callbacks.add(callback);
-    }
-
-    @Override
     public boolean isEnded() {
         return ended;
     }
@@ -80,7 +45,37 @@ public abstract class AbstractInterpolation <T> implements Interpolation<T> {
     public void restart() {
         ended = false;
         acumulatedTime = reverse ? duration : 0;
+        if (selfCreatedClock) {
+            clock.stop();
+            clock.start();
+        }
     }
+
+    @Override
+    public T get() {
+        if (ended) {
+            return reverse ? min : max;
+        }
+
+        if (!clock.isStarted() && selfCreatedClock) {
+            clock.start();
+        }
+
+        long delay = clock.getDelay();
+        acumulatedTime += reverse ? -delay : delay;
+
+        if (acumulatedTime > duration || acumulatedTime < 0) {
+            ended = true;
+            if (selfCreatedClock) {
+                clock.stop();
+            }
+            callbacks.forEach(callback -> callback.accept(this));
+        }
+
+        return compute(min, max, (double) acumulatedTime / duration);
+    }
+
+    protected abstract T compute(T a, T b, double t);
 
     @Override
     public boolean isReverse() {
@@ -95,6 +90,11 @@ public abstract class AbstractInterpolation <T> implements Interpolation<T> {
     @Override
     public InterpolationType getType() {
         return type;
+    }
+
+    @Override
+    public void addOnEndCallback(Consumer<Interpolation<T>> callback) {
+        callbacks.add(callback);
     }
 
     @Override

@@ -21,11 +21,11 @@ public class MineDriftClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		var commonInterpolation = new FloatInterpolation(InterpolationType.LINEAR, 0f, 1f, 30000);
-//		commonInterpolation.addOnEndCallback(interpolation -> interpolation.setReverse(!interpolation.isReverse()));
-//		interpolation = new RepetitiveInterpolation<>(commonInterpolation, -1);
-
-		interpolation = commonInterpolation;
+		interpolation= new FloatInterpolation(InterpolationType.EASE_IN_OUT, 0f, 1f, 2000);
+		interpolation.addOnEndCallback(interpolation -> {
+			interpolation.setReverse(!interpolation.isReverse());
+			interpolation.restart();
+		});
 
 		HudElementRegistry.addFirst(Identifier.fromNamespaceAndPath(MOD_ID, "trying_to_figure_it_out"),
 				(graphics, deltaTracker) -> {
@@ -35,8 +35,6 @@ public class MineDriftClient implements ClientModInitializer {
 			renderDriftText(graphics, deltaTracker);
 			pose.popMatrix();
 		});
-
-
 
 	}
 

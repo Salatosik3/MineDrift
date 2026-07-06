@@ -15,7 +15,13 @@ public class Vec2Interpolation extends AbstractInterpolation<Vec2> {
 
     @Override
     protected Vec2 compute(Vec2 a, Vec2 b, double t) {
-        return new Vec2(type.getFunc().calculate(a.x, b.x, t).floatValue(),
-                type.getFunc().calculate(a.y, b.y, t).floatValue());
+        return new Vec2(computeSingleValue(a.x, b.x, t), computeSingleValue(a.y, b.y, t));
+    }
+
+    private float computeSingleValue(float a, float b, double t) {
+        return (float) switch(type) {
+            case LINEAR -> a + (b - a) * t;
+            case EASE_IN_OUT -> a + (b - a) * t * t * (3 - 2 * t);
+        };
     }
 }
