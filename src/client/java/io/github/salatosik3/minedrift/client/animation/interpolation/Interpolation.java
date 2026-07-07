@@ -13,9 +13,5 @@ public interface Interpolation <T> {
 
     void setReverse(boolean reverse);
 
-    InterpolationType getType();
-
-    void setType(InterpolationType type);
-
     void addOnEndCallback(Consumer<Interpolation<T>> callback);
 }

@@ -21,11 +21,11 @@ public class MineDriftClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		interpolation= new FloatInterpolation(InterpolationType.EASE_IN_OUT, 0f, 1f, 2000);
-		interpolation.addOnEndCallback(interpolation -> {
-			interpolation.setReverse(!interpolation.isReverse());
-			interpolation.restart();
-		});
+//		interpolation= new FloatInterpolation(InterpolationType.EASE_IN_OUT, 0f, 1f, 2000);
+//		interpolation.addOnEndCallback(interpolation -> {
+//			interpolation.setReverse(!interpolation.isReverse());
+//			interpolation.restart();
+//		});
 
 		HudElementRegistry.addFirst(Identifier.fromNamespaceAndPath(MOD_ID, "trying_to_figure_it_out"),
 				(graphics, deltaTracker) -> {
@@ -60,13 +60,13 @@ public class MineDriftClient implements ClientModInitializer {
 		pose.translate(sw * offsetOfBorder, sh * offsetOfBorder);
 
 		pose.rotate(45);
-		float scaleFactor = interpolation.get();
-		float maxScaleSize = 2;
-		float floorSize = 1;
-		pose.scale(maxScaleSize * scaleFactor + floorSize);
+//		float scaleFactor = interpolation.get();
+//		float maxScaleSize = 2;
+//		float floorSize = 1;
+//		pose.scale(maxScaleSize * scaleFactor + floorSize);
 
 		var textGraphics = graphics.textRenderer();
-		textGraphics.accept(0, 0, Component.literal(String.valueOf(scaleFactor) + ": " + String.valueOf(interpolation.isEnded())));
+//		textGraphics.accept(0, 0, Component.literal(String.valueOf(scaleFactor) + ": " + String.valueOf(interpolation.isEnded())));
 
 //		if (interpolation.isEnded()) {
 //			interpolation.restart();

@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 
 public abstract class AbstractInterpolation <T> implements Interpolation<T> {
 
-    protected InterpolationType type;
     private final Clock clock;
     private T min, max;
     private long duration;
@@ -22,8 +21,7 @@ public abstract class AbstractInterpolation <T> implements Interpolation<T> {
 
     private final List<Consumer<Interpolation<T>>> callbacks = new ArrayList<>();
 
-    public AbstractInterpolation(InterpolationType type, Clock clock, T min, T max, long duration) {
-        this.type = type;
+    public AbstractInterpolation(Clock clock, T min, T max, long duration) {
         this.clock = clock;
         this.min = min;
         this.max = max;
@@ -31,8 +29,8 @@ public abstract class AbstractInterpolation <T> implements Interpolation<T> {
         selfCreatedClock = false;
     }
 
-    public AbstractInterpolation(InterpolationType type, T min, T max, long duration) {
-        this(type, new Clock(), min, max, duration);
+    public AbstractInterpolation(T min, T max, long duration) {
+        this(new Clock(), min, max, duration);
         selfCreatedClock = true;
     }
 
@@ -88,17 +86,7 @@ public abstract class AbstractInterpolation <T> implements Interpolation<T> {
     }
 
     @Override
-    public InterpolationType getType() {
-        return type;
-    }
-
-    @Override
     public void addOnEndCallback(Consumer<Interpolation<T>> callback) {
         callbacks.add(callback);
-    }
-
-    @Override
-    public void setType(InterpolationType type) {
-        this.type = type;
     }
 }
