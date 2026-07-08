@@ -5,7 +5,13 @@ import java.util.function.Consumer;
 public interface Interpolation <T> {
     T get();
 
-    boolean isEnded();
+    boolean isFinished();
+
+    boolean isStopped();
+
+    void start();
+
+    void stop();
 
     void restart();
 

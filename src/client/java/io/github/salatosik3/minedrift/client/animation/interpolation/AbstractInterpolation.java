@@ -1,6 +1,5 @@
 package io.github.salatosik3.minedrift.client.animation.interpolation;
 
-import io.github.salatosik3.minedrift.client.MineDriftClient;
 import io.github.salatosik3.minedrift.client.animation.Clock;
 
 import java.util.ArrayList;
@@ -9,53 +8,65 @@ import java.util.function.Consumer;
 
 public abstract class AbstractInterpolation <T> implements Interpolation<T> {
 
-    private final Clock clock;
+    private final Clock clock = new Clock();
     private T min, max;
     private long duration;
 
     private long acumulatedTime = 0;
-    private boolean ended = false;
+    private boolean finished = false;
+    private boolean stopped = false;
     private boolean reverse = false;
-
-    private boolean selfCreatedClock;
 
     private final List<Consumer<Interpolation<T>>> callbacks = new ArrayList<>();
 
-    public AbstractInterpolation(Clock clock, T min, T max, long duration) {
-        this.clock = clock;
+    public AbstractInterpolation(T min, T max, long duration) {
         this.min = min;
         this.max = max;
         this.duration = duration;
-        selfCreatedClock = false;
-    }
-
-    public AbstractInterpolation(T min, T max, long duration) {
-        this(new Clock(), min, max, duration);
-        selfCreatedClock = true;
     }
 
     @Override
-    public boolean isEnded() {
-        return ended;
+    public boolean isFinished() {
+        return finished;
+    }
+
+    @Override
+    public boolean isStopped() {
+        return stopped;
+    }
+
+    @Override
+    public void start() {
+        stopped = false;
+        clock.start();
+    }
+
+    @Override
+    public void stop() {
+        stopped = true;
+        clock.stop();
     }
 
     @Override
     public void restart() {
-        ended = false;
+        stopped = false;
+        finished = false;
         acumulatedTime = reverse ? duration : 0;
-        if (selfCreatedClock) {
-            clock.stop();
-            clock.start();
-        }
+        clock.stop();
+        clock.start();
     }
 
     @Override
     public T get() {
-        if (ended) {
+        if (finished) {
             return reverse ? min : max;
         }
 
-        if (!clock.isStarted() && selfCreatedClock) {
+        if (stopped) {
+            return compute(min, max, (double) acumulatedTime / duration);
+        }
+
+        if (!clock.isStarted()) {
             clock.start();
         }
 
@@ -63,10 +74,8 @@ public abstract class AbstractInterpolation <T> implements Interpolation<T> {
         acumulatedTime += reverse ? -delay : delay;
 
         if (acumulatedTime > duration || acumulatedTime < 0) {
-            ended = true;
-            if (selfCreatedClock) {
-                clock.stop();
-            }
+            finished = true;
+            clock.stop();
             callbacks.forEach(callback -> callback.accept(this));
         }
 

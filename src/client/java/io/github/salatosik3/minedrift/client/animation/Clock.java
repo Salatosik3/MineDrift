@@ -1,5 +1,7 @@
 package io.github.salatosik3.minedrift.client.animation;
 
+// TODO clock is good for one source of usage, but bad at multiply, it means that when object A uses clock A while object B also uses clock A, then object A will always get 0 delay. Is this bad? Maybe
+// This class was created in mind that an top object creates bottom level objects that rely on this class, so in this way the top level object can in this way synchronize time and control speed from one place.
 public class Clock {
     private double speed;
     private boolean started = false;

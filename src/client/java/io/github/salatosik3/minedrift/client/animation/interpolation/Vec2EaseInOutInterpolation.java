@@ -4,10 +4,6 @@ import io.github.salatosik3.minedrift.client.animation.Clock;
 import net.minecraft.world.phys.Vec2;
 
 public class Vec2EaseInOutInterpolation extends AbstractInterpolation<Vec2> {
-    public Vec2EaseInOutInterpolation(Clock clock, Vec2 min, Vec2 max, long duration) {
-        super(clock, min, max, duration);
-    }
-
     public Vec2EaseInOutInterpolation(Vec2 min, Vec2 max, long duration) {
         super(min, max, duration);
     }

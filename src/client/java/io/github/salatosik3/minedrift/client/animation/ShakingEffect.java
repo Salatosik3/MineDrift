@@ -6,7 +6,7 @@ import net.minecraft.world.phys.Vec2;
 
 import java.util.Random;
 
-public class V2ShakingAnimation implements Animation<Vec2> {
+public class ShakingEffect implements Effect<Vec2> {
 
     private final Random random = new Random();
     private final Interpolation<Vec2> interpolation;
@@ -20,7 +20,7 @@ public class V2ShakingAnimation implements Animation<Vec2> {
 
     private int shakePosIndex = 0;
 
-    public V2ShakingAnimation(long shakeDuration) {
+    public ShakingEffect(long shakeDuration) {
         interpolation = new Vec2LinearInterpolation(new Vec2(0, 0), new Vec2(1, 1), shakeDuration);
         interpolation.addOnEndCallback(i ->  {
             i.setMin(i.getMax());
@@ -33,7 +33,7 @@ public class V2ShakingAnimation implements Animation<Vec2> {
         });
     }
 
-    public V2ShakingAnimation() {
+    public ShakingEffect() {
         this(75);
     }
 

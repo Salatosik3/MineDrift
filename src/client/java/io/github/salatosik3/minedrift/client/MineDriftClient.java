@@ -1,8 +1,9 @@
 package io.github.salatosik3.minedrift.client;
 
 import io.github.salatosik3.minedrift.client.animation.Animation;
-import io.github.salatosik3.minedrift.client.animation.Clock;
-import io.github.salatosik3.minedrift.client.animation.V2ShakingAnimation;
+import io.github.salatosik3.minedrift.client.animation.Effect;
+import io.github.salatosik3.minedrift.client.animation.ShakingEffect;
+import io.github.salatosik3.minedrift.client.animation.SlideInAnimation;
 import io.github.salatosik3.minedrift.client.animation.interpolation.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -21,7 +22,8 @@ public class MineDriftClient implements ClientModInitializer {
 	private long lastRenderTime = System.currentTimeMillis();
 	private int angleDegrees = 0;
 	private Interpolation<Float> interpolation;
-	private Animation<Vec2> shaking = new V2ShakingAnimation();
+	private Effect<Vec2> shaking = new ShakingEffect();
+	private Animation<SlideInAnimation.Data> anim = new SlideInAnimation(5000);
 
 	@Override
 	public void onInitializeClient() {
@@ -46,8 +48,12 @@ public class MineDriftClient implements ClientModInitializer {
 		var newTime = System.currentTimeMillis();
 		var del = newTime - lastRenderTime;
 
-		if (del < 500) {
-//			return;
+		if (anim.isFinished()) {
+			anim.restart();
+		}
+
+		if (del > 10000) {
+//			anim.start();
 
 		} else {
 			lastRenderTime = newTime;
@@ -70,11 +76,14 @@ public class MineDriftClient implements ClientModInitializer {
 //		pose.scale(maxScaleSize * scaleFactor + floorSize);
 
 		Vec2 animatedVec = shaking.animate();
-		int x = Math.round(animatedVec.x * 10);
+		SlideInAnimation.Data slideInData = anim.animate();
+
+		int x = Math.round(animatedVec.x * 10) + Math.round((1 - slideInData.getSlideFactor()) * (sh / 2));
 		int y = Math.round(animatedVec.y * 10);
 
 		var textGraphics = graphics.textRenderer();
-		textGraphics.accept(x, y, Component.literal("AAAAAA"));
+		textGraphics.defaultParameters(textGraphics.defaultParameters().withOpacity(slideInData.getVisibilityFactor()));
+		textGraphics.accept(x, y, Component.literal("A"));
 
 //		if (interpolation.isEnded()) {
 //			interpolation.restart();
