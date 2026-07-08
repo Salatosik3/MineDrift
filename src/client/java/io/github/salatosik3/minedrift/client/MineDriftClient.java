@@ -1,6 +1,8 @@
 package io.github.salatosik3.minedrift.client;
 
+import io.github.salatosik3.minedrift.client.animation.Animation;
 import io.github.salatosik3.minedrift.client.animation.Clock;
+import io.github.salatosik3.minedrift.client.animation.V2ShakingAnimation;
 import io.github.salatosik3.minedrift.client.animation.interpolation.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -8,6 +10,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.phys.Vec2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +21,7 @@ public class MineDriftClient implements ClientModInitializer {
 	private long lastRenderTime = System.currentTimeMillis();
 	private int angleDegrees = 0;
 	private Interpolation<Float> interpolation;
+	private Animation<Vec2> shaking = new V2ShakingAnimation();
 
 	@Override
 	public void onInitializeClient() {
@@ -57,16 +61,20 @@ public class MineDriftClient implements ClientModInitializer {
 		var pose = graphics.pose();
 
 		float offsetOfBorder = 0.05f; // How far from the border of HUD in percentage
-		pose.translate(sw * offsetOfBorder, sh * offsetOfBorder);
+		pose.translate(sw / 2, sh * offsetOfBorder);
 
-		pose.rotate(45);
+//		pose.rotate(45);
 //		float scaleFactor = interpolation.get();
 //		float maxScaleSize = 2;
 //		float floorSize = 1;
 //		pose.scale(maxScaleSize * scaleFactor + floorSize);
 
+		Vec2 animatedVec = shaking.animate();
+		int x = Math.round(animatedVec.x * 10);
+		int y = Math.round(animatedVec.y * 10);
+
 		var textGraphics = graphics.textRenderer();
-//		textGraphics.accept(0, 0, Component.literal(String.valueOf(scaleFactor) + ": " + String.valueOf(interpolation.isEnded())));
+		textGraphics.accept(x, y, Component.literal("AAAAAA"));
 
 //		if (interpolation.isEnded()) {
 //			interpolation.restart();

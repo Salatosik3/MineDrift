@@ -86,6 +86,26 @@ public abstract class AbstractInterpolation <T> implements Interpolation<T> {
     }
 
     @Override
+    public T getMin() {
+        return min;
+    }
+
+    @Override
+    public void setMax(T max) {
+        this.max = max;
+    }
+
+    @Override
+    public T getMax() {
+        return max;
+    }
+
+    @Override
+    public void setMin(T min) {
+        this.min = min;
+    }
+
+    @Override
     public void addOnEndCallback(Consumer<Interpolation<T>> callback) {
         callbacks.add(callback);
     }

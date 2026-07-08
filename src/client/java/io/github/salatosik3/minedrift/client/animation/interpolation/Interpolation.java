@@ -14,4 +14,12 @@ public interface Interpolation <T> {
     void setReverse(boolean reverse);
 
     void addOnEndCallback(Consumer<Interpolation<T>> callback);
+
+    T getMin();
+
+    void setMin(T min);
+
+    T getMax();
+
+    void setMax(T max);
 }
