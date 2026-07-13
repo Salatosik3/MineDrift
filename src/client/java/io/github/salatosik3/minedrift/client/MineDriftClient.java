@@ -1,5 +1,6 @@
 package io.github.salatosik3.minedrift.client;
 
+import io.github.salatosik3.minedrift.Networking;
 import io.github.salatosik3.minedrift.client.animation.Animation;
 import io.github.salatosik3.minedrift.client.animation.Effect;
 import io.github.salatosik3.minedrift.client.animation.ShakingEffect;

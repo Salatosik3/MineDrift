@@ -22,6 +22,8 @@ dependencies {
 	minecraft("com.mojang:minecraft:${providers.gradleProperty("minecraft_version").get()}")
 	implementation("net.fabricmc:fabric-loader:${providers.gradleProperty("loader_version").get()}")
 	implementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty("fabric_api_version").get()}")
+
+	implementation(project(":networking"))
 }
 
 tasks.processResources {
@@ -54,4 +56,11 @@ tasks.jar {
 	from("LICENSE") {
 		rename { "${it}_$projectName" }
 	}
+
+	// Includes all subproject .class files, maybe there is better solution...
+	project.subprojects.forEach { from(it.sourceSets.main.get().output) }
+}
+
+tasks.runClient {
+	subprojects.forEach { it.tasks.named("runClient").get().enabled = false }
 }
