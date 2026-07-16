@@ -1,22 +1,6 @@
 package io.github.salatosik3.minedrift.client;
-
-import io.github.salatosik3.minedrift.Networking;
-import io.github.salatosik3.minedrift.client.animation.Animation;
-import io.github.salatosik3.minedrift.client.animation.Effect;
-import io.github.salatosik3.minedrift.client.animation.ShakingEffect;
-import io.github.salatosik3.minedrift.client.animation.SlideInAnimation;
-import io.github.salatosik3.minedrift.client.animation.interpolation.*;
 import io.github.salatosik3.minedrift.client.hud.HudElementRegistrar;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.phys.Vec2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

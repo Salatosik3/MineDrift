@@ -1,15 +1,39 @@
 package io.github.salatosik3.minedrift.listener.bus;
 
 import io.github.salatosik3.minedrift.event.data.BoatDriftEvent;
-import net.minecraft.network.chat.Component;
+import io.github.salatosik3.minedrift.networking.client.DriftPayload;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class BoatDriftListener implements Consumer<BoatDriftEvent> {
+    private final Map<UUID, Long> lastPacketSendTime = new HashMap<>();
+
+    private long calcDelaySinceLastPacket(UUID uuid) {
+        Long lastSendTime = lastPacketSendTime.get(uuid);
+        if (lastSendTime == null) {
+            lastPacketSendTime.put(uuid, System.currentTimeMillis());
+            return -1;
+        }
+        long currentTime = System.currentTimeMillis();
+        long delay = currentTime - lastSendTime;
+        lastPacketSendTime.put(uuid, currentTime);
+        return delay;
+    }
+
     @Override
     public void accept(BoatDriftEvent boatDriftEvent) {
-        boatDriftEvent.getServerPlayer().sendOverlayMessage(
-                Component.literal("%.2f".formatted(boatDriftEvent.getDriftAngle()))
-        );
+        var serverPlayer = boatDriftEvent.getServerPlayer();
+        long delay = calcDelaySinceLastPacket(serverPlayer.getUUID());
+
+        if (delay != -1 && delay < 500) {
+            return;
+        }
+
+        var driftPayload = new DriftPayload(boatDriftEvent.getDriftAngle());
+        ServerPlayNetworking.send(serverPlayer, driftPayload);
     }
 }

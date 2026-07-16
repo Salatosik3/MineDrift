@@ -3,6 +3,7 @@ package io.github.salatosik3.minedrift;
 import io.github.salatosik3.minedrift.event.EventBus;
 import io.github.salatosik3.minedrift.listener.bus.BusEventListenerManager;
 import io.github.salatosik3.minedrift.listener.fabric.EventListenerManager;
+import io.github.salatosik3.minedrift.networking.Networking;
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.resources.Identifier;
@@ -19,10 +20,6 @@ public class MineDrift implements ModInitializer {
 	private final EventBus eventBus = new EventBus();
 	private final EventListenerManager eventListenerManager = new EventListenerManager(eventBus);
 	private final BusEventListenerManager busEventListenerManager = new BusEventListenerManager(eventBus);
-
-	public static Identifier id(String path) {
-		return Identifier.fromNamespaceAndPath(MOD_ID, path);
-	}
 
 	@Override
 	public void onInitialize() {
