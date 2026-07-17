@@ -12,6 +12,6 @@ public final class Networking {
     }
 
     static {
-        init();
+        init(); // I hate this I hate this I hate this I hate this I hate this I hate this I hate this I hate this I hate this I hate this
     }
 }
