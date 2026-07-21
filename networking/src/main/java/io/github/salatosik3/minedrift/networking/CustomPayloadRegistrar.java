@@ -6,12 +6,8 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 public final class CustomPayloadRegistrar {
     public static final String MOD_ID = "minedrift";
 
-    private static void init() {
+    public static void registerAll() {
         var clientReg = PayloadTypeRegistry.clientboundPlay();
         clientReg.register(DriftPayload.TYPE, DriftPayload.CODEC);
-    }
-
-    static {
-        init();
     }
 }

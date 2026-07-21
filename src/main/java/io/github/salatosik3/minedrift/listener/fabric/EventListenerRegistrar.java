@@ -6,11 +6,11 @@ import io.github.salatosik3.minedrift.listener.fabric.drift.BoatDriftListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EventListenerManager {
+public class EventListenerRegistrar {
     private final List<EventListener> listeners = new ArrayList<>();
     private final EventBus eventBus;
 
-    public EventListenerManager(EventBus eventBus) {
+    public EventListenerRegistrar(EventBus eventBus) {
         this.eventBus = eventBus;
     }
 
