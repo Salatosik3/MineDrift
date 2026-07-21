@@ -1,4 +1,5 @@
 package io.github.salatosik3.minedrift.client;
+import io.github.salatosik3.minedrift.client.hud.CustomHudRegistrar;
 import io.github.salatosik3.minedrift.networking.CustomPayloadRegistrar;
 import net.fabricmc.api.ClientModInitializer;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ public class MineDriftClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		CustomPayloadRegistrar.registerAll();
+		CustomHudRegistrar.registerAll();
 	}
 //
 //	private void renderDriftText(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {

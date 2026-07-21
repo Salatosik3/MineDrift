@@ -16,8 +16,10 @@ public final class CustomHudRegistrar {
         // I hate this design
     }
 
-    static {
-        register(DriftPointCounter::new, DriftPointCounter.ID);
+    public static void registerAll() {
+        register(() -> {
+            return new DriftPointCounter() hmmmmm
+        }, DriftPointCounter.ID);
     }
 
     private static <T extends HudElement> void register(Supplier<T> constructor, Identifier identifier) {
