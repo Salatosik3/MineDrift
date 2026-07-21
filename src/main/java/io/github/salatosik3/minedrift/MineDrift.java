@@ -3,10 +3,7 @@ package io.github.salatosik3.minedrift;
 import io.github.salatosik3.minedrift.event.EventBus;
 import io.github.salatosik3.minedrift.listener.bus.BusEventListenerManager;
 import io.github.salatosik3.minedrift.listener.fabric.EventListenerManager;
-import io.github.salatosik3.minedrift.networking.Networking;
 import net.fabricmc.api.ModInitializer;
-
-import net.minecraft.resources.Identifier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

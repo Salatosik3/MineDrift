@@ -9,11 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-// TODO ahhh I don't know it looks and sound shitty, I just have to try to implement this without static otherwise I will just fuck up whole thing
-public final class CustomHudRegister {
+public final class CustomHudRegistrar {
     private static final Map<Class<?>, ? super HudElement> huds = new HashMap<>();
 
-    private CustomHudRegister() {
+    private CustomHudRegistrar() {
         // I hate this design
     }
 

@@ -3,7 +3,7 @@ package io.github.salatosik3.minedrift.networking;
 import io.github.salatosik3.minedrift.networking.client.DriftPayload;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
-public final class Networking {
+public final class CustomPayloadRegistrar {
     public static final String MOD_ID = "minedrift";
 
     private static void init() {
@@ -12,6 +12,6 @@ public final class Networking {
     }
 
     static {
-        init(); // I hate this I hate this I hate this I hate this I hate this I hate this I hate this I hate this I hate this I hate this
+        init();
     }
 }
