@@ -1,4 +1,5 @@
 package io.github.salatosik3.minedrift.client;
+import io.github.salatosik3.minedrift.client.handler.packet.PacketHandlerRegistrar;
 import io.github.salatosik3.minedrift.client.hud.CustomHudRegistrar;
 import io.github.salatosik3.minedrift.networking.CustomPayloadRegistrar;
 import net.fabricmc.api.ClientModInitializer;
@@ -13,6 +14,7 @@ public class MineDriftClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		CustomPayloadRegistrar.registerAll();
 		CustomHudRegistrar.registerAll();
+		PacketHandlerRegistrar.registerAll();
 	}
 //
 //	private void renderDriftText(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
