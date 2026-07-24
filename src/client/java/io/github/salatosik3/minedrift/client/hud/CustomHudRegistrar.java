@@ -17,11 +17,10 @@ public final class CustomHudRegistrar {
     }
 
     public static void registerAll() {
-        register(() -> {
-            return new DriftPointCounter() hmmmmm
-        }, DriftPointCounter.ID);
+        register(new DriftPointCounter());
     }
 
+    // TODO I should make some general generic class for this purpose, like Registrar<T> and it will have get, register and so on
     private static <T extends HudElement> void register(Supplier<T> constructor, Identifier identifier) {
         T instance = constructor.get();
         HudElementRegistry.addLast(identifier, instance);
