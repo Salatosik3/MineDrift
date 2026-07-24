@@ -1,6 +1,6 @@
-package io.github.salatosik3.minedrift.event;
+package io.github.salatosik3.minedrift.server.event;
 
-import io.github.salatosik3.minedrift.event.data.Event;
+import io.github.salatosik3.minedrift.server.event.data.Event;
 
 import java.util.function.Consumer;
 

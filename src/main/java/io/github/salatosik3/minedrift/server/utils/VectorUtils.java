@@ -1,4 +1,4 @@
-package io.github.salatosik3.minedrift.utils;
+package io.github.salatosik3.minedrift.server.utils;
 
 import net.minecraft.world.phys.Vec3;
 

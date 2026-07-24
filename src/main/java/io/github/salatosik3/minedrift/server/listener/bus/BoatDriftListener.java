@@ -1,6 +1,6 @@
-package io.github.salatosik3.minedrift.listener.bus;
+package io.github.salatosik3.minedrift.server.listener.bus;
 
-import io.github.salatosik3.minedrift.event.data.BoatDriftEvent;
+import io.github.salatosik3.minedrift.server.event.data.BoatDriftEvent;
 import io.github.salatosik3.minedrift.networking.client.DriftPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 

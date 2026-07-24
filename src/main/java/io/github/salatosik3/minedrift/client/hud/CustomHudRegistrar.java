@@ -1,5 +1,6 @@
 package io.github.salatosik3.minedrift.client.hud;
 
+import io.github.salatosik3.minedrift.client.handler.packet.DriftDataSource;
 import io.github.salatosik3.minedrift.client.hud.elements.DriftPointCounter;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -17,7 +18,14 @@ public final class CustomHudRegistrar {
     }
 
     public static void registerAll() {
-        register(new DriftPointCounter());
+        register(() -> {
+            return new DriftPointCounter(new DriftDataSource() {
+                @Override
+                public int getPoints() {
+                    return 0;
+                }
+            });
+        }, DriftPointCounter.ID);
     }
 
     // TODO I should make some general generic class for this purpose, like Registrar<T> and it will have get, register and so on

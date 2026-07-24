@@ -16,19 +16,12 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-          "io.github.salatosik3.minedrift.MineDrift"
+			"io.github.salatosik3.minedrift.server.MineDrift"
 		],
 		"client": [
 			"io.github.salatosik3.minedrift.client.MineDriftClient"
 		]
 	},
-	"mixins": [
-		"minedrift.mixins.json",
-		{
-			"config": "minedrift.client.mixins.json",
-			"environment": "client"
-		}
-	],
 	"depends": {
 		"fabricloader": ">=0.19.3",
 		"minecraft": "~26.2",

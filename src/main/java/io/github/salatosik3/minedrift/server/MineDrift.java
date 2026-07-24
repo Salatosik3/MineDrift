@@ -1,8 +1,8 @@
-package io.github.salatosik3.minedrift;
+package io.github.salatosik3.minedrift.server;
 
-import io.github.salatosik3.minedrift.event.EventBus;
-import io.github.salatosik3.minedrift.listener.bus.BusEventListenerRegistrar;
-import io.github.salatosik3.minedrift.listener.fabric.EventListenerRegistrar;
+import io.github.salatosik3.minedrift.server.event.EventBus;
+import io.github.salatosik3.minedrift.server.listener.bus.BusEventListenerRegistrar;
+import io.github.salatosik3.minedrift.server.listener.fabric.EventListenerRegistrar;
 import net.fabricmc.api.ModInitializer;
 
 import org.slf4j.Logger;

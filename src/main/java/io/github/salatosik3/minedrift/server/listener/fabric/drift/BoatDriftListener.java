@@ -1,9 +1,9 @@
-package io.github.salatosik3.minedrift.listener.fabric.drift;
+package io.github.salatosik3.minedrift.server.listener.fabric.drift;
 
-import io.github.salatosik3.minedrift.event.ListenerInvoker;
-import io.github.salatosik3.minedrift.event.data.BoatDriftEvent;
-import io.github.salatosik3.minedrift.utils.VectorUtils;
-import io.github.salatosik3.minedrift.listener.fabric.EventListener;
+import io.github.salatosik3.minedrift.server.event.ListenerInvoker;
+import io.github.salatosik3.minedrift.server.event.data.BoatDriftEvent;
+import io.github.salatosik3.minedrift.server.utils.VectorUtils;
+import io.github.salatosik3.minedrift.server.listener.fabric.EventListener;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;

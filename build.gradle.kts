@@ -6,12 +6,12 @@ version = providers.gradleProperty("mod_version").get()
 group = providers.gradleProperty("maven_group").get()
 
 loom {
-	splitEnvironmentSourceSets()
+//	splitEnvironmentSourceSets()
 
 	mods {
 		register("minedrift") {
 			sourceSet(sourceSets.main.get())
-			sourceSet(sourceSets.getByName("client"))
+//			sourceSet(sourceSets.getByName("client"))
 		}
 	}
 

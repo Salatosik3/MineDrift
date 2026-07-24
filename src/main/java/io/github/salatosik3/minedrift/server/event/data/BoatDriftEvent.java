@@ -1,4 +1,4 @@
-package io.github.salatosik3.minedrift.event.data;
+package io.github.salatosik3.minedrift.server.event.data;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
