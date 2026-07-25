@@ -1,4 +1,4 @@
-package io.github.salatosik3.minedrift.client.handler.packet;
+package io.github.salatosik3.minedrift.networking;
 
 import io.github.salatosik3.minedrift.misc.Registrar;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
