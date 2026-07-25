@@ -1,8 +1,6 @@
 package io.github.salatosik3.minedrift.client.hud.elements;
 
 import io.github.salatosik3.minedrift.client.MineDriftClient;
-import io.github.salatosik3.minedrift.networking.PacketHandlerRegistrar;
-import io.github.salatosik3.minedrift.networking.client.DriftPayload;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor;

@@ -1,5 +1,4 @@
 package io.github.salatosik3.minedrift.client;
-import io.github.salatosik3.minedrift.networking.PacketHandlerRegistrar;
 import io.github.salatosik3.minedrift.client.hud.CustomHudRegistrar;
 import io.github.salatosik3.minedrift.networking.CustomPayloadRegistrar;
 import net.fabricmc.api.ClientModInitializer;
