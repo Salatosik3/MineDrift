@@ -6,11 +6,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public class PacketHandlerRegistrar {
 
-    private static Registrar registrar;
-
-    public static void registerAll() {
-
-    }
+    private static Registrar registrar = new Registrar();
 
     public static <T extends CustomPacketPayload, H extends ClientPlayNetworking.PlayPayloadHandler<T>> void register(H handler, CustomPacketPayload.Type<T> type) {
         registrar.register(handler.getClass(), type);

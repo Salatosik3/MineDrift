@@ -14,7 +14,6 @@ public class MineDriftClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		CustomPayloadRegistrar.registerAll();
 		CustomHudRegistrar.registerAll();
-		PacketHandlerRegistrar.registerAll();
 	}
 //
 //	private void renderDriftText(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
