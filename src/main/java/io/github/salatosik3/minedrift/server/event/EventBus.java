@@ -13,6 +13,7 @@ public class EventBus implements EventListenerRegistrar, ListenerInvoker {
     private final Map<Class<?>, List<Consumer<Event>>> listeners = new HashMap<>();
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends Event> void register(Class<T> clazz, Consumer<T> listener) {
         var listeners = this.listeners.computeIfAbsent(clazz, _ -> new ArrayList<>());
         listeners.add((Consumer<Event>) listener);

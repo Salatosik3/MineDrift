@@ -1,6 +1,7 @@
 package io.github.salatosik3.minedrift.misc;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Registrar {

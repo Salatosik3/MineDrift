@@ -13,8 +13,6 @@ public class MineDrift implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	private final EventBus eventBus = new EventBus();
-
-	// TODO Something wrong with these... (namings)
 	private final EventListenerRegistrar eventListenerRegistrar = new EventListenerRegistrar(eventBus);
 	private final BusEventListenerRegistrar busEventListenerRegistrar = new BusEventListenerRegistrar(eventBus);
 
