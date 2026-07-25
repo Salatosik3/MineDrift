@@ -12,9 +12,7 @@ public class DriftPointCounter implements HudElement {
     public static final Identifier ID = Identifier.fromNamespaceAndPath(MineDriftClient.MOD_ID, "drift_point_counter");
 
     public DriftPointCounter() {
-        PacketHandlerRegistrar.register((payload, context) -> {
 
-        }, DriftPayload.TYPE);
     }
 
     @Override

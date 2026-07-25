@@ -23,7 +23,7 @@ public record DriftStatePayload(String stateName) implements CustomPacketPayload
     }
 
     public static final Identifier ID = Identifier.fromNamespaceAndPath(CustomPayloadRegistrar.MOD_ID, "drift_state");
-    public static final CustomPacketPayload.Type<DriftPayload> TYPE = new CustomPacketPayload.Type<>(ID);
+    public static final CustomPacketPayload.Type<DriftStatePayload> TYPE = new CustomPacketPayload.Type<>(ID);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, DriftStatePayload> CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, DriftStatePayload::stateName,
