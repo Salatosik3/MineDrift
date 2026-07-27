@@ -1,31 +1,68 @@
 package io.github.salatosik3.minedrift.client.hud.elements;
 
+import com.mojang.authlib.minecraft.client.MinecraftClient;
 import io.github.salatosik3.minedrift.client.MineDriftClient;
+import io.github.salatosik3.minedrift.client.animation.Effect;
+import io.github.salatosik3.minedrift.client.animation.ShakingEffect;
+import io.github.salatosik3.minedrift.client.animation.interpolation.FloatLinearInterpolation;
+import io.github.salatosik3.minedrift.client.animation.interpolation.Interpolation;
 import io.github.salatosik3.minedrift.client.packet.PacketHandlerRegistrar;
 import io.github.salatosik3.minedrift.networking.client.DriftPayload;
+import io.github.salatosik3.minedrift.networking.client.DriftState;
 import io.github.salatosik3.minedrift.networking.client.DriftStatePayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.TextAlignment;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.phys.Vec2;
+
+import java.awt.*;
 
 public class DriftPointCounter implements HudElement {
     public static final Identifier ID = Identifier.fromNamespaceAndPath(MineDriftClient.MOD_ID, "drift_point_counter");
 
-    public DriftPointCounter() {
-        PacketHandlerRegistrar.register((payload, context) -> {
-            MineDriftClient.LOGGER.debug(payload.toString());
-        }, DriftStatePayload.TYPE);
+    private final Interpolation<Float> scoreInterpolation;
+    private final Effect<Vec2> shakingEffect = new ShakingEffect();
 
-        PacketHandlerRegistrar.register((payload, context) -> {
-            MineDriftClient.LOGGER.debug(payload.toString());
-        }, DriftPayload.TYPE);
+    public DriftPointCounter() {
+        scoreInterpolation = new FloatLinearInterpolation(0f, 0f, 200);
+
+        // TODO it isn't good in my opinion, so I have to change everything later
+        PacketHandlerRegistrar.register(this::onStateChange, DriftStatePayload.TYPE);
+        PacketHandlerRegistrar.register(this::onDrift, DriftPayload.TYPE);
+    }
+
+    private void onStateChange(DriftStatePayload payload, ClientPlayNetworking.Context context) {
+        // TODO to be used
+    }
+
+    private void onDrift(DriftPayload payload, ClientPlayNetworking.Context context) {
+        scoreInterpolation.setMin((float) payload.oldScore());
+        scoreInterpolation.setMax((float) payload.newScore());
     }
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
-        // TODO render
+        var matrices = graphics.pose();
+        matrices.pushMatrix();
+        matrices.translate((float) graphics.guiWidth() / 2, (float) graphics.guiHeight() / 5);
+
+        int interpolatedScoreValue = (int) Math.floor(scoreInterpolation.get());
+        float x = 0, y = 0;
+        float maxCoordinateOffset = 4;
+
+        var shakingVec = shakingEffect.animate();
+        x += (maxCoordinateOffset * shakingVec.x) - maxCoordinateOffset / 2;
+        y += (maxCoordinateOffset * shakingVec.y) - maxCoordinateOffset / 2;
+
+        graphics.textRenderer().accept(TextAlignment.CENTER, Math.round(x), Math.round(y), Component.literal(String.valueOf(interpolatedScoreValue)));
+
+        matrices.popMatrix();
     }
 
     //
