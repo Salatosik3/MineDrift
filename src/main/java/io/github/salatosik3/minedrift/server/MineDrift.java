@@ -15,10 +15,10 @@ public class MineDrift implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	private final EventBus eventBus = new EventBus();
-	private final ServiceRegistrar serviceRegistrar = new ServiceRegistrar();
+	private final TimerManager timerManager = new TimerManager();
+	private final ServiceRegistrar serviceRegistrar = new ServiceRegistrar(timerManager);
 	private final EventListenerRegistrar eventListenerRegistrar = new EventListenerRegistrar(eventBus);
 	private final BusEventListenerRegistrar busEventListenerRegistrar = new BusEventListenerRegistrar(eventBus, serviceRegistrar);
-	private final TimerManager timerManager = new TimerManager();
 
 	@Override
 	public void onInitialize() {

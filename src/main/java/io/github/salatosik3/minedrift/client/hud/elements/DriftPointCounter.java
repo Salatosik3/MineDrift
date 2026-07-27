@@ -1,6 +1,10 @@
 package io.github.salatosik3.minedrift.client.hud.elements;
 
 import io.github.salatosik3.minedrift.client.MineDriftClient;
+import io.github.salatosik3.minedrift.client.packet.PacketHandlerRegistrar;
+import io.github.salatosik3.minedrift.networking.client.DriftPayload;
+import io.github.salatosik3.minedrift.networking.client.DriftStatePayload;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -10,7 +14,13 @@ public class DriftPointCounter implements HudElement {
     public static final Identifier ID = Identifier.fromNamespaceAndPath(MineDriftClient.MOD_ID, "drift_point_counter");
 
     public DriftPointCounter() {
+        PacketHandlerRegistrar.register((payload, context) -> {
+            MineDriftClient.LOGGER.debug(payload.toString());
+        }, DriftStatePayload.TYPE);
 
+        PacketHandlerRegistrar.register((payload, context) -> {
+            MineDriftClient.LOGGER.debug(payload.toString());
+        }, DriftPayload.TYPE);
     }
 
     @Override
