@@ -8,13 +8,12 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.NonNull;
 
-public record DriftPayload(double driftAngle, int oldScore, int newScore) implements CustomPacketPayload {
+public record DriftPayload(int oldScore, int newScore) implements CustomPacketPayload {
 
     public static final Identifier ID = Identifier.fromNamespaceAndPath(CustomPayloadRegistrar.MOD_ID, "drift");
     public static final CustomPacketPayload.Type<DriftPayload> TYPE = new CustomPacketPayload.Type<>(ID);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, DriftPayload> CODEC = StreamCodec.composite(
-            ByteBufCodecs.DOUBLE, DriftPayload::driftAngle,
             ByteBufCodecs.INT, DriftPayload::oldScore,
             ByteBufCodecs.INT, DriftPayload::newScore,
             DriftPayload::new

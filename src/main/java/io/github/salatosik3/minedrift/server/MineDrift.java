@@ -4,6 +4,7 @@ import io.github.salatosik3.minedrift.server.event.EventBus;
 import io.github.salatosik3.minedrift.server.listener.bus.BusEventListenerRegistrar;
 import io.github.salatosik3.minedrift.server.listener.fabric.EventListenerRegistrar;
 import io.github.salatosik3.minedrift.server.service.ServiceRegistrar;
+import io.github.salatosik3.minedrift.server.timer.TimerManager;
 import net.fabricmc.api.ModInitializer;
 
 import org.slf4j.Logger;
@@ -17,11 +18,14 @@ public class MineDrift implements ModInitializer {
 	private final ServiceRegistrar serviceRegistrar = new ServiceRegistrar();
 	private final EventListenerRegistrar eventListenerRegistrar = new EventListenerRegistrar(eventBus);
 	private final BusEventListenerRegistrar busEventListenerRegistrar = new BusEventListenerRegistrar(eventBus, serviceRegistrar);
+	private final TimerManager timerManager = new TimerManager();
 
 	@Override
 	public void onInitialize() {
 		serviceRegistrar.registerAll();
 		busEventListenerRegistrar.registerAll();
 		eventListenerRegistrar.registerAll();
+
+//		timerManager.cancelAll(); // TODO figure out how to list to server shutdown event to be able to cancel all timers.
 	}
 }
