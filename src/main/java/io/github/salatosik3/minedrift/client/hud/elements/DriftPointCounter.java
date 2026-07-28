@@ -59,26 +59,17 @@ public class DriftPointCounter implements HudElement {
         if (driftState != null) {
             var slideAnimData = slideAnimation.animate();
 
-            float slideFactor = slideAnimData.getSlideFactor();
-            float visibilityFactor = slideAnimData.getVisibilityFactor();
-
-
-            boolean reverseAnimValue = switch (driftState) {
+            boolean reverse = switch (driftState) {
                 case STARTED -> false;
                 case ENDED, FAILED -> true;
             };
-
-            if (reverseAnimValue) {
-                slideFactor = 1.0f - slideFactor;
-                visibilityFactor = 1.0f - visibilityFactor;
-            }
+            slideAnimation.setReverse(reverse);
 
             float maxSlideOffset = 10;
-            float slideOffset = maxSlideOffset * slideFactor;
+            float slideOffset = maxSlideOffset * slideAnimData.getSlideFactor();
 
-            MineDriftClient.LOGGER.debug("slide factor: %s, visibility facto: %s".formatted(slideFactor, visibilityFactor));
             x += slideOffset;
-            textRenderer.defaultParameters(textRenderer.defaultParameters().withOpacity(visibilityFactor));
+            textRenderer.defaultParameters(textRenderer.defaultParameters().withOpacity(slideAnimData.getVisibilityFactor()));
 
             if (slideAnimation.isFinished()) {
                 driftState = null;

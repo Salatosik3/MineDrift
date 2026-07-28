@@ -6,10 +6,6 @@ import java.util.function.Consumer;
 public interface Animation <T> {
     T animate();
 
-    default void animate(BiConsumer<T, Animation<T>> consumer) {
-        consumer.accept(animate(), this);
-    }
-
     boolean isFinished();
 
     boolean isStopped();
@@ -21,4 +17,6 @@ public interface Animation <T> {
     void restart();
 
     void reset();
+
+    void setReverse(boolean reverse);
 }

@@ -60,6 +60,12 @@ public class SlideInAnimation implements Animation<SlideInAnimation.Data> {
         visibilityInterpolation.reset();
     }
 
+    @Override
+    public void setReverse(boolean reverse) {
+        slideInterpolation.setReverse(reverse);
+        slideInterpolation.setReverse(reverse);
+    }
+
     public static class Data {
         private float slideFactor;
         private float visibilityFactor;
