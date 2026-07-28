@@ -1,4 +1,4 @@
-package io.github.salatosik3.minedrift.client.animation;
+package io.github.salatosik3.minedrift.client.motion;
 
 public class Clock {
     private double speed;

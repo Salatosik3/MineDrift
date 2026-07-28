@@ -1,7 +1,7 @@
-package io.github.salatosik3.minedrift.client.animation.v2.interpolation.mixed;
+package io.github.salatosik3.minedrift.client.motion.interpolation.mixed;
 
-import io.github.salatosik3.minedrift.client.animation.v2.interpolation.EaseInOutInterpolation;
-import io.github.salatosik3.minedrift.client.animation.v2.interpolation.Interpolation;
+import io.github.salatosik3.minedrift.client.motion.interpolation.EaseInOutInterpolation;
+import io.github.salatosik3.minedrift.client.motion.interpolation.Interpolation;
 
 public class Vec2EaseInOutInterpolation extends AbstractVec2Interpolation {
     public Vec2EaseInOutInterpolation(long duration) {

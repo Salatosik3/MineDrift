@@ -1,6 +1,6 @@
-package io.github.salatosik3.minedrift.client.animation.v2.interpolation;
+package io.github.salatosik3.minedrift.client.motion.interpolation;
 
-import io.github.salatosik3.minedrift.client.animation.Clock;
+import io.github.salatosik3.minedrift.client.motion.Clock;
 
 public abstract class AbstractInterpolation implements Interpolation {
 

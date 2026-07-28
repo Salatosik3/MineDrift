@@ -1,4 +1,4 @@
-package io.github.salatosik3.minedrift.client.animation.v2.interpolation;
+package io.github.salatosik3.minedrift.client.motion.interpolation;
 
 public interface Interpolation extends GenericInterpolation<Float> {
     Float interpolate();

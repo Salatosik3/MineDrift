@@ -1,6 +1,6 @@
-package io.github.salatosik3.minedrift.client.animation.v2.effect;
+package io.github.salatosik3.minedrift.client.motion.effect;
 
-import io.github.salatosik3.minedrift.client.animation.v2.interpolation.mixed.Vec2LinearInterpolation;
+import io.github.salatosik3.minedrift.client.motion.interpolation.mixed.Vec2LinearInterpolation;
 import net.minecraft.world.phys.Vec2;
 
 import java.util.Random;
