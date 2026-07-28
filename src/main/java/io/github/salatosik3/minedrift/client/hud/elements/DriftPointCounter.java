@@ -22,11 +22,13 @@ public class DriftPointCounter implements HudElement {
 
     private final Interpolation scoreInterpolation = new LinearInterpolation(200);
     private final ShakingEffect shakingEffect = new ShakingEffect();
-    private final SlideInAnimation slideAnimation = new SlideInAnimation(2000);
+    private final SlideInAnimation slideAnimation = new SlideInAnimation(500);
 
     private DriftState driftState = null;
     private float oldScore = 0;
     private float newScore = 0;
+
+    private float lastTextVisibility = 0f;
 
     public DriftPointCounter() {
         // TODO it isn't good in my opinion, so I have to change everything later
@@ -51,7 +53,7 @@ public class DriftPointCounter implements HudElement {
 
         int interpolatedScoreValue = (int) Math.floor(oldScore + scoreInterpolation.interpolate() * newScore);
         float x = 0, y = 0;
-        float maxCoordinateOffset = 4;
+        float maxCoordinateOffset = 2;
 
         var shakingVec = shakingEffect.animate();
         x += (maxCoordinateOffset * shakingVec.x) - maxCoordinateOffset / 2;
@@ -68,11 +70,11 @@ public class DriftPointCounter implements HudElement {
             };
             slideAnimation.setReverse(reverse);
 
-            float maxSlideOffset = 10;
-            float slideOffset = maxSlideOffset * slideAnimData.getSlideFactor();
+            float slideOffset = 20 * slideAnimData.getSlideFactor();
+            MineDriftClient.LOGGER.debug("SlideFactor: " + slideAnimData.getSlideFactor());
 
-            x += slideOffset;
-            textRenderer.defaultParameters(textRenderer.defaultParameters().withOpacity(slideAnimData.getVisibilityFactor()));
+            y += slideOffset;
+            lastTextVisibility = slideAnimData.getVisibilityFactor();
 
             if (slideAnimation.isFinished()) {
                 driftState = null;
@@ -80,6 +82,7 @@ public class DriftPointCounter implements HudElement {
             }
         }
 
+        textRenderer.defaultParameters(textRenderer.defaultParameters().withOpacity(lastTextVisibility));
         textRenderer.accept(TextAlignment.CENTER, Math.round(x), Math.round(y), Component.literal(String.valueOf(interpolatedScoreValue)));
         matrices.popMatrix();
     }

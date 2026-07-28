@@ -26,6 +26,7 @@ public abstract class AbstractInterpolation implements Interpolation {
         if (!pause && !clock.isStarted()) {
             clock.start();
         }
+
         accumulatedTime += clock.getDelay();
 
         if (accumulatedTime > duration) {
@@ -55,5 +56,10 @@ public abstract class AbstractInterpolation implements Interpolation {
     @Override
     public void setPause(boolean pause) {
         this.pause = pause;
+        if (pause) {
+            clock.stop();
+        } else {
+            clock.start();
+        }
     }
 }
