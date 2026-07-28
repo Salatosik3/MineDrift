@@ -3,7 +3,8 @@ package io.github.salatosik3.minedrift.client.hud.elements;
 import io.github.salatosik3.minedrift.client.MineDriftClient;
 import io.github.salatosik3.minedrift.client.animation.ShakingEffect;
 import io.github.salatosik3.minedrift.client.animation.SlideInAnimation;
-import io.github.salatosik3.minedrift.client.animation.interpolation.FloatLinearInterpolation;
+import io.github.salatosik3.minedrift.client.animation.v2.interpolation.Interpolation;
+import io.github.salatosik3.minedrift.client.animation.v2.interpolation.LinearInterpolation;
 import io.github.salatosik3.minedrift.client.packet.PacketHandlerRegistrar;
 import io.github.salatosik3.minedrift.networking.client.DriftPayload;
 import io.github.salatosik3.minedrift.networking.client.DriftState;
@@ -19,11 +20,13 @@ import net.minecraft.resources.Identifier;
 public class DriftPointCounter implements HudElement {
     public static final Identifier ID = Identifier.fromNamespaceAndPath(MineDriftClient.MOD_ID, "drift_point_counter");
 
-    private final FloatLinearInterpolation scoreInterpolation = new FloatLinearInterpolation(0f, 0f, 200);
+    private final Interpolation scoreInterpolation = new LinearInterpolation(200);
     private final ShakingEffect shakingEffect = new ShakingEffect();
     private final SlideInAnimation slideAnimation = new SlideInAnimation(2000);
 
     private DriftState driftState = null;
+    private float oldScore = 0;
+    private float newScore = 0;
 
     public DriftPointCounter() {
         // TODO it isn't good in my opinion, so I have to change everything later
@@ -36,8 +39,8 @@ public class DriftPointCounter implements HudElement {
     }
 
     private void onDrift(DriftPayload payload, ClientPlayNetworking.Context context) {
-        scoreInterpolation.setMin((float) payload.oldScore());
-        scoreInterpolation.setMax((float) payload.newScore());
+        this.oldScore = (float) payload.oldScore();
+        this.newScore = (float) payload.newScore();
     }
 
     @Override
@@ -46,7 +49,7 @@ public class DriftPointCounter implements HudElement {
         matrices.pushMatrix();
         matrices.translate((float) graphics.guiWidth() / 2, (float) graphics.guiHeight() / 5);
 
-        int interpolatedScoreValue = (int) Math.floor(scoreInterpolation.get());
+        int interpolatedScoreValue = (int) Math.floor(oldScore + scoreInterpolation.interpolate() * newScore);
         float x = 0, y = 0;
         float maxCoordinateOffset = 4;
 
