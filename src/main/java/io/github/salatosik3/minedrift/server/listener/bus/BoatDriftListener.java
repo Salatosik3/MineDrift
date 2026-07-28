@@ -15,7 +15,6 @@ public class BoatDriftListener implements Consumer<BoatDriftEvent> {
 
     @Override
     public void accept(BoatDriftEvent boatDriftEvent) {
-        boatDriftEvent.getServerPlayer().sendOverlayMessage(Component.literal("You're drifting")); // TODO remove
         driftPacketService.notifyPlayerDrifting(boatDriftEvent.getServerPlayer(), boatDriftEvent.getDriftAngle(), boatDriftEvent.getBoat(), boatDriftEvent.getBoatVelocity());
     }
 }

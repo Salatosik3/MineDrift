@@ -14,7 +14,7 @@ import java.util.*;
 
 public class DriftPacketServiceImpl implements DriftPacketService, SimpleTimerTask {
     public static final long MAX_DRIFT_DELAY = 3000L;
-    private final Map<UUID, DriftData> playerDriftData = new HashMap<>();
+    private final Map<UUID, DriftData> playerDriftData = new HashMap<>(); // TODO potential resource race problem yooooo
     private final Map<UUID, ServerPlayer> players = new HashMap<>(); // TODO its temporary, maybe
 
     public DriftPacketServiceImpl(Timer timer) {

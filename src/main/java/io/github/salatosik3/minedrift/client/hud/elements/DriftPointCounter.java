@@ -69,10 +69,7 @@ public class DriftPointCounter implements HudElement {
             slideAnimation.setReverse(reverse);
 
             var slideAnimData = slideAnimation.animate();
-
-
             float slideOffset = 20 * slideAnimData.getSlideFactor() - 20;
-            MineDriftClient.LOGGER.debug("slideOffset: " + slideOffset);
 
             y += slideOffset;
             lastTextVisibility = slideAnimData.getVisibilityFactor();
