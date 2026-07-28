@@ -54,6 +54,12 @@ public class SlideInAnimation implements Animation<SlideInAnimation.Data> {
         visibilityInterpolation.restart();
     }
 
+    @Override
+    public void reset() {
+        slideInterpolation.reset();
+        visibilityInterpolation.reset();
+    }
+
     public static class Data {
         private float slideFactor;
         private float visibilityFactor;

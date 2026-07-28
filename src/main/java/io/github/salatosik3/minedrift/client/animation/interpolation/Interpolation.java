@@ -15,6 +15,8 @@ public interface Interpolation <T> {
 
     void restart();
 
+    void reset();
+
     boolean isReverse();
 
     void setReverse(boolean reverse);

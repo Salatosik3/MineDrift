@@ -57,6 +57,15 @@ public abstract class AbstractInterpolation <T> implements Interpolation<T> {
     }
 
     @Override
+    public void reset() {
+        acumulatedTime = 0;
+        finished = false;
+        stopped = false;
+        reverse = false;
+        clock.stop();
+    }
+
+    @Override
     public T get() {
         if (finished) {
             return reverse ? min : max;

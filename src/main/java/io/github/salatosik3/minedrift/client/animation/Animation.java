@@ -19,4 +19,6 @@ public interface Animation <T> {
     void stop();
 
     void restart();
+
+    void reset();
 }
