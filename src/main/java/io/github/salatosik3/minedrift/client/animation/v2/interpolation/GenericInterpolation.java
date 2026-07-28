@@ -1,7 +1,7 @@
 package io.github.salatosik3.minedrift.client.animation.v2.interpolation;
 
-public interface Interpolation extends GenericInterpolation<Float> {
-    Float interpolate();
+public interface GenericInterpolation<T> {
+    T interpolate();
 
     void setReverse(boolean reverse);
 

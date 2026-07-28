@@ -22,7 +22,7 @@ public abstract class AbstractInterpolation implements Interpolation {
     }
 
     @Override
-    public float interpolate() {
+    public Float interpolate() {
         if (!pause && !clock.isStarted()) {
             clock.start();
         }
