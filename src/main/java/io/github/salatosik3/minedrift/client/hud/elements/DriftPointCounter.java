@@ -1,8 +1,8 @@
 package io.github.salatosik3.minedrift.client.hud.elements;
 
 import io.github.salatosik3.minedrift.client.MineDriftClient;
-import io.github.salatosik3.minedrift.client.animation.ShakingEffect;
 import io.github.salatosik3.minedrift.client.animation.SlideInAnimation;
+import io.github.salatosik3.minedrift.client.animation.v2.effect.ShakingEffect;
 import io.github.salatosik3.minedrift.client.animation.v2.interpolation.Interpolation;
 import io.github.salatosik3.minedrift.client.animation.v2.interpolation.LinearInterpolation;
 import io.github.salatosik3.minedrift.client.packet.PacketHandlerRegistrar;
