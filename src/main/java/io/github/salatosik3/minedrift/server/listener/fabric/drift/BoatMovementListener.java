@@ -12,10 +12,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class BoatMovementListener implements EventListener {
     private static final double SMALLEST_OPERAPABLE_VALUE = 0e-2d;
@@ -31,6 +28,7 @@ public class BoatMovementListener implements EventListener {
             EntityTypes.SPRUCE_BOAT
     );
     private final Map<UUID, Vec3> lastVehicleLoc = new HashMap<>();
+    private final Map<UUID, Set<Double>> vehicleAvgVelLengths = new HashMap<>();
 
     private final ListenerInvoker listenerInvoker;
 
@@ -63,10 +61,32 @@ public class BoatMovementListener implements EventListener {
         });
     }
 
+    private double avg(Collection<Double> doubles) {
+        double sum = 0;
+        for (double d : doubles) sum += d;
+        return sum / doubles.size();
+    }
+
     private void onVehicleMove(ServerPlayer player, Entity boat, Vec3 vehicleVel) {
         if (!BOATS.contains(boat.getType())) {
             return;
         }
+
+        // START shit
+        var velocities = vehicleAvgVelLengths.computeIfAbsent(boat.getUUID(), _ -> new HashSet<>());
+        double vehicleVelLength = vehicleVel.length();
+        double averageLength = avg(velocities);
+
+        if (averageLength > vehicleVelLength) {
+            double lengthFactor = vehicleVelLength / averageLength;
+            if (lengthFactor < 0.50f) {
+                player.sendOverlayMessage(Component.literal("MIBOMBOOO"));
+            }
+        }
+
+        velocities.add(vehicleVelLength);
+        // END shit
+
         if (vehicleVel.length() < SMALLEST_OPERAPABLE_VALUE) {
             return;
         }
