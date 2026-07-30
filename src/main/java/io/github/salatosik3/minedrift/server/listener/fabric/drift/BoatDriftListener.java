@@ -5,6 +5,7 @@ import io.github.salatosik3.minedrift.server.event.data.BoatDriftEvent;
 import io.github.salatosik3.minedrift.server.utils.VectorUtils;
 import io.github.salatosik3.minedrift.server.listener.fabric.EventListener;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -73,7 +74,8 @@ public class BoatDriftListener implements EventListener {
         var vl = boat.getLookAngle().multiply(-1, 1, -1);
         double driftAngle = Math.abs(VectorUtils.calculate2DAngle(boatVel, vl));
 
-        if (driftAngle >= 15 && driftAngle <= 120) {
+        if (driftAngle >= 30 && driftAngle <= 120 && boatVel.length() > 0.1f) {
+            player.sendOverlayMessage(Component.literal(String.valueOf(boatVel.length())));
             onBoatDrift(player, boat, boatVel, driftAngle);
         }
     }
