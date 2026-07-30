@@ -31,7 +31,6 @@ public class DriftPointCounter implements HudElement {
     private float lastTextVisibility = 0f;
 
     public DriftPointCounter() {
-        // TODO it isn't good in my opinion, so I have to change everything later
         PacketHandlerRegistrar.register(this::onStateChange, DriftStatePayload.TYPE);
         PacketHandlerRegistrar.register(this::onDrift, DriftPayload.TYPE);
     }
