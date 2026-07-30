@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class BoatDriftListener implements EventListener {
+public class BoatMovementListener implements EventListener {
     private static final double SMALLEST_OPERAPABLE_VALUE = 0e-2d;
     private static final List<EntityType<?>> BOATS = List.of(
             EntityTypes.ACACIA_BOAT,
@@ -34,7 +34,7 @@ public class BoatDriftListener implements EventListener {
 
     private final ListenerInvoker listenerInvoker;
 
-    public BoatDriftListener(ListenerInvoker listenerInvoker) {
+    public BoatMovementListener(ListenerInvoker listenerInvoker) {
         this.listenerInvoker = listenerInvoker;
     }
 
@@ -63,24 +63,27 @@ public class BoatDriftListener implements EventListener {
         });
     }
 
-    private void onVehicleMove(ServerPlayer player, Entity boat, Vec3 boatVel) {
+    private void onVehicleMove(ServerPlayer player, Entity boat, Vec3 vehicleVel) {
         if (!BOATS.contains(boat.getType())) {
             return;
         }
-        if (boatVel.length() < SMALLEST_OPERAPABLE_VALUE) {
+        if (vehicleVel.length() < SMALLEST_OPERAPABLE_VALUE) {
             return;
         }
 
         var vl = boat.getLookAngle().multiply(-1, 1, -1);
-        double driftAngle = Math.abs(VectorUtils.calculate2DAngle(boatVel, vl));
+        double driftAngle = Math.abs(VectorUtils.calculate2DAngle(vehicleVel, vl));
 
-        if (driftAngle >= 30 && driftAngle <= 120 && boatVel.length() > 0.1f) {
-            player.sendOverlayMessage(Component.literal(String.valueOf(boatVel.length())));
-            onBoatDrift(player, boat, boatVel, driftAngle);
+        if (driftAngle >= 30 && driftAngle <= 120 && vehicleVel.length() > 0.1f) {
+            onBoatDrift(player, boat, vehicleVel, driftAngle);
         }
     }
 
     private void onBoatDrift(ServerPlayer player, Entity boat, Vec3 boatVel, double driftAngle) {
         listenerInvoker.invoke(new BoatDriftEvent(player, boat, boatVel, driftAngle));
+    }
+
+    private void onBoatCollide(ServerPlayer player, Entity boat) {
+        player.sendOverlayMessage(Component.literal("Collision detected!")); // TODO remove
     }
 }

@@ -1,7 +1,7 @@
 package io.github.salatosik3.minedrift.server.listener.fabric;
 
 import io.github.salatosik3.minedrift.server.event.EventBus;
-import io.github.salatosik3.minedrift.server.listener.fabric.drift.BoatDriftListener;
+import io.github.salatosik3.minedrift.server.listener.fabric.drift.BoatMovementListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +20,6 @@ public class EventListenerRegistrar {
     }
 
     public void registerAll() {
-        register(new BoatDriftListener(eventBus));
+        register(new BoatMovementListener(eventBus));
     }
 }
