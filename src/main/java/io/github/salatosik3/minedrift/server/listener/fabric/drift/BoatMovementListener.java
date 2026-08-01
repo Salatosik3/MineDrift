@@ -5,17 +5,23 @@ import io.github.salatosik3.minedrift.server.event.data.BoatDriftEvent;
 import io.github.salatosik3.minedrift.server.utils.VectorUtils;
 import io.github.salatosik3.minedrift.server.listener.fabric.EventListener;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class BoatMovementListener implements EventListener {
-    private static final double SMALLEST_OPERAPABLE_VALUE = 0e-2d;
+    private static final double SMALLEST_OPERAPABLE_VALUE = 1.0E-2D;
     private static final List<EntityType<?>> BOATS = List.of(
             EntityTypes.ACACIA_BOAT,
             EntityTypes.BIRCH_BOAT,
@@ -28,7 +34,6 @@ public class BoatMovementListener implements EventListener {
             EntityTypes.SPRUCE_BOAT
     );
     private final Map<UUID, Vec3> lastVehicleLoc = new HashMap<>();
-    private final Map<UUID, Set<Double>> vehicleAvgVelLengths = new HashMap<>();
 
     private final ListenerInvoker listenerInvoker;
 
@@ -61,10 +66,43 @@ public class BoatMovementListener implements EventListener {
         });
     }
 
-    private double avg(Collection<Double> doubles) {
-        double sum = 0;
-        for (double d : doubles) sum += d;
-        return sum / doubles.size();
+    private void demoParticle(Level level, double x, double y, double z) {
+        if (level instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.COMPOSTER, x, y + 2, z, 10, 0, 0, 0, 0.1);
+        }
+    }
+
+    private void demoParticle(Level level, Vec3 vec) {
+        demoParticle(level, vec.x, vec.y, vec.z);
+    }
+
+    private void raytrace(Level level, Vec3 boatPosition, Vec3 boatVelocityDirection, Consumer<Vec3> consumer) {
+        Vec3 positionOffset = boatVelocityDirection;
+
+        while(true) {
+            Vec3 offsetBoatPosition = boatPosition.add(positionOffset);
+            boolean isPositionOnAir = level.getBlockState(BlockPos.containing(offsetBoatPosition)).isAir();
+            if (!isPositionOnAir) {
+                break;
+            }
+
+            double offsetDistance = offsetBoatPosition.distanceTo(boatPosition);
+            if (offsetDistance > 5) {
+                break;
+            }
+
+            consumer.accept(offsetBoatPosition);
+            positionOffset = positionOffset.add(boatVelocityDirection);
+        }
+    }
+
+    private void testRaytrace(Level level, Vec3 start, Vec3 velocity) {
+        Vec3 normalizedVelocity = velocity.normalize();
+
+        Consumer<Vec3> tracePositionConsumer = position -> demoParticle(level, position);
+        raytrace(level, start, normalizedVelocity, tracePositionConsumer);
+        raytrace(level, start, normalizedVelocity.yRot((float) Math.toRadians(90)), tracePositionConsumer);
+        raytrace(level, start, normalizedVelocity.yRot((float) Math.toRadians(-90)), tracePositionConsumer);
     }
 
     private void onVehicleMove(ServerPlayer player, Entity boat, Vec3 vehicleVel) {
@@ -72,24 +110,11 @@ public class BoatMovementListener implements EventListener {
             return;
         }
 
-        // START shit
-        var velocities = vehicleAvgVelLengths.computeIfAbsent(boat.getUUID(), _ -> new HashSet<>());
-        double vehicleVelLength = vehicleVel.length();
-        double averageLength = avg(velocities);
-
-        if (averageLength > vehicleVelLength) {
-            double lengthFactor = vehicleVelLength / averageLength;
-            if (lengthFactor < 0.50f) {
-                player.sendOverlayMessage(Component.literal("MIBOMBOOO"));
-            }
-        }
-
-        velocities.add(vehicleVelLength);
-        // END shit
-
-        if (vehicleVel.length() < SMALLEST_OPERAPABLE_VALUE) {
+        if (vehicleVel.length() < SMALLEST_OPERAPABLE_VALUE) { // This thing is necessary because of how a computer stores floating point numbers
             return;
         }
+
+        testRaytrace(boat.level(), boat.position(), vehicleVel); // Because of how Vec3 class was implemented (e.g Vec3.normalize() method that will return ZERO vector just because dist is less than 1.0E-5D) I have to control floating point number situation either in this method or in this method that is called by this method blah blah blah
 
         var vl = boat.getLookAngle().multiply(-1, 1, -1);
         double driftAngle = Math.abs(VectorUtils.calculate2DAngle(vehicleVel, vl));
