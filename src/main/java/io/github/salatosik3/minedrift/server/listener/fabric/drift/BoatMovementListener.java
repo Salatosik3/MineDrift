@@ -16,9 +16,9 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class BoatMovementListener implements EventListener {
     private static final double SMALLEST_OPERAPABLE_VALUE = 1.0E-2D;
@@ -33,7 +33,8 @@ public class BoatMovementListener implements EventListener {
             EntityTypes.PALE_OAK_BOAT,
             EntityTypes.SPRUCE_BOAT
     );
-    private final Map<UUID, Vec3> lastVehicleLoc = new HashMap<>();
+    private final Map<UUID, Vec3> lastEntityPositions = new HashMap<>();
+    private final Map<UUID, Vec3> lastEntityVelocities = new HashMap<>();
 
     private final ListenerInvoker listenerInvoker;
 
@@ -53,22 +54,22 @@ public class BoatMovementListener implements EventListener {
                 }
 
                 var posVec = new Vec3(vehicle.getX(), vehicle.getY(), vehicle.getZ());
-                var lastPosVec = lastVehicleLoc.get(vehicle.getUUID());
+                var lastPosVec = lastEntityPositions.get(vehicle.getUUID());
 
                 if (lastPosVec != null) {
-                    var velocity = lastPosVec.subtract(posVec);
+                    var velocity = posVec.subtract(lastPosVec);
                     velocity = VectorUtils.nullifyNearZeroValues(velocity, SMALLEST_OPERAPABLE_VALUE);
                     onVehicleMove(player, vehicle, velocity);
                 }
 
-                lastVehicleLoc.put(vehicle.getUUID(), posVec);
+                lastEntityPositions.put(vehicle.getUUID(), posVec);
             }
         });
     }
 
     private void demoParticle(Level level, double x, double y, double z) {
         if (level instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(ParticleTypes.COMPOSTER, x, y + 2, z, 10, 0, 0, 0, 0.1);
+            serverLevel.sendParticles(ParticleTypes.COMPOSTER, x, y, z, 10, 0, 0, 0, 0.1);
         }
     }
 
@@ -76,33 +77,44 @@ public class BoatMovementListener implements EventListener {
         demoParticle(level, vec.x, vec.y, vec.z);
     }
 
-    private void raytrace(Level level, Vec3 boatPosition, Vec3 boatVelocityDirection, Consumer<Vec3> consumer) {
-        Vec3 positionOffset = boatVelocityDirection;
+    private @Nullable BlockState raytrace(Level level, Vec3 startPosition, Vec3 direction, double maxDistance) {
+        if (direction.length() == 0) {
+            return null;
+        }
+
+        Vec3 positionOffset = direction;
 
         while(true) {
-            Vec3 offsetBoatPosition = boatPosition.add(positionOffset);
-            boolean isPositionOnAir = level.getBlockState(BlockPos.containing(offsetBoatPosition)).isAir();
-            if (!isPositionOnAir) {
+            Vec3 offsetBoatPosition = startPosition.add(positionOffset);
+
+            double offsetDistance = offsetBoatPosition.distanceTo(startPosition);
+            if (offsetDistance > maxDistance) {
                 break;
             }
 
-            double offsetDistance = offsetBoatPosition.distanceTo(boatPosition);
-            if (offsetDistance > 5) {
-                break;
+            BlockState offsetPositionBlockState = level.getBlockState(BlockPos.containing(offsetBoatPosition));
+            demoParticle(level, offsetBoatPosition);
+
+            if (!offsetPositionBlockState.isAir()) {
+                return offsetPositionBlockState;
             }
 
-            consumer.accept(offsetBoatPosition);
-            positionOffset = positionOffset.add(boatVelocityDirection);
+            positionOffset = positionOffset.add(direction);
         }
+
+        return null;
     }
 
-    private void testRaytrace(Level level, Vec3 start, Vec3 velocity) {
-        Vec3 normalizedVelocity = velocity.normalize();
-
-        Consumer<Vec3> tracePositionConsumer = position -> demoParticle(level, position);
-        raytrace(level, start, normalizedVelocity, tracePositionConsumer);
-        raytrace(level, start, normalizedVelocity.yRot((float) Math.toRadians(90)), tracePositionConsumer);
-        raytrace(level, start, normalizedVelocity.yRot((float) Math.toRadians(-90)), tracePositionConsumer);
+    private boolean checkCollision(Entity entity, Vec3 velocity) {
+        Vec3 direction = velocity.normalize();
+        for (int i = -90; i <= 90; i += 10) {
+            Vec3 rotatedDirection = direction.yRot((float) Math.toRadians(i));
+            BlockState blockState = raytrace(entity.level(), entity.position(), rotatedDirection, entity.getBoundingBox().getSize());
+            if (blockState != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void onVehicleMove(ServerPlayer player, Entity boat, Vec3 vehicleVel) {
@@ -114,7 +126,9 @@ public class BoatMovementListener implements EventListener {
             return;
         }
 
-        testRaytrace(boat.level(), boat.position(), vehicleVel); // Because of how Vec3 class was implemented (e.g Vec3.normalize() method that will return ZERO vector just because dist is less than 1.0E-5D) I have to control floating point number situation either in this method or in this method that is called by this method blah blah blah
+        if (checkCollision(boat, vehicleVel)) {
+            player.sendOverlayMessage(Component.literal("Your boat has been collided with some block"));
+        }
 
         var vl = boat.getLookAngle().multiply(-1, 1, -1);
         double driftAngle = Math.abs(VectorUtils.calculate2DAngle(vehicleVel, vl));
