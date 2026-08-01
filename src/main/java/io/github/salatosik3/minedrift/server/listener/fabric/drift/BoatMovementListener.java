@@ -34,7 +34,6 @@ public class BoatMovementListener implements EventListener {
             EntityTypes.SPRUCE_BOAT
     );
     private final Map<UUID, Vec3> lastEntityPositions = new HashMap<>();
-    private final Map<UUID, Vec3> lastEntityVelocities = new HashMap<>();
 
     private final ListenerInvoker listenerInvoker;
 
