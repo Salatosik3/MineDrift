@@ -67,16 +67,6 @@ public class BoatMovementListener implements EventListener {
         });
     }
 
-    private void demoParticle(Level level, double x, double y, double z) {
-        if (level instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(ParticleTypes.COMPOSTER, x, y, z, 10, 0, 0, 0, 0.1);
-        }
-    }
-
-    private void demoParticle(Level level, Vec3 vec) {
-        demoParticle(level, vec.x, vec.y, vec.z);
-    }
-
     private @Nullable BlockState raytrace(Level level, Vec3 startPosition, Vec3 direction, double maxDistance) {
         if (direction.length() == 0) {
             return null;
@@ -93,7 +83,6 @@ public class BoatMovementListener implements EventListener {
             }
 
             BlockState offsetPositionBlockState = level.getBlockState(BlockPos.containing(offsetBoatPosition));
-            demoParticle(level, offsetBoatPosition);
 
             if (!offsetPositionBlockState.isAir()) {
                 return offsetPositionBlockState;
@@ -107,7 +96,7 @@ public class BoatMovementListener implements EventListener {
 
     private boolean checkCollision(Entity entity, Vec3 velocity) {
         Vec3 direction = velocity.normalize();
-        for (int i = -90; i <= 90; i += 10) {
+        for (int i = -90; i <= 90; i += 40) {
             Vec3 rotatedDirection = direction.yRot((float) Math.toRadians(i));
             BlockState blockState = raytrace(entity.level(), entity.position(), rotatedDirection, entity.getBoundingBox().getSize());
             if (blockState != null) {
@@ -127,7 +116,7 @@ public class BoatMovementListener implements EventListener {
         }
 
         if (checkCollision(boat, vehicleVel)) {
-            player.sendOverlayMessage(Component.literal("Your boat has been collided with some block"));
+            onBoatCollide(player, boat);
         }
 
         var vl = boat.getLookAngle().multiply(-1, 1, -1);
@@ -143,6 +132,6 @@ public class BoatMovementListener implements EventListener {
     }
 
     private void onBoatCollide(ServerPlayer player, Entity boat) {
-        player.sendOverlayMessage(Component.literal("Collision detected!")); // TODO remove
+        player.sendOverlayMessage(Component.literal("Collision detected!")); // TODO replace it on another logic like an event invocation or optionally think about a better solution, maybe I should call it not as a collision, maybe I should it process in another way
     }
 }
