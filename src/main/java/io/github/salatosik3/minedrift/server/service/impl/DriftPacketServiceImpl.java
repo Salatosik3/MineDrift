@@ -6,14 +6,10 @@ import io.github.salatosik3.minedrift.networking.client.DriftState;
 import io.github.salatosik3.minedrift.networking.client.DriftStatePayload;
 import io.github.salatosik3.minedrift.server.service.DriftPacketService;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,7 +26,7 @@ public class DriftPacketServiceImpl implements DriftPacketService, SimpleTimerTa
     }
 
     @Override
-    public void notifyPlayerDrifting(ServerPlayer player, double angle, Entity boat, Vec3 velocity) {
+    public void notifyDrifting(ServerPlayer player, double angle, Entity vehicle, Vec3 velocity) {
         long currentTime = System.currentTimeMillis();
 
         DriftData data = playerDriftData.computeIfAbsent(player.getUUID(), _ -> {
@@ -49,7 +45,7 @@ public class DriftPacketServiceImpl implements DriftPacketService, SimpleTimerTa
     }
 
     @Override
-    public void notifyCollisionDuringDrifting(ServerPlayer player) { // TODO to be implemented
+    public void notifyCollision(ServerPlayer player, Entity vehicle) {
 
     }
 

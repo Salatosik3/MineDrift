@@ -1,14 +1,12 @@
 package io.github.salatosik3.minedrift.server.listener.fabric.drift;
 
 import io.github.salatosik3.minedrift.server.event.ListenerInvoker;
+import io.github.salatosik3.minedrift.server.event.data.BoatCollisionEvent;
 import io.github.salatosik3.minedrift.server.event.data.BoatDriftEvent;
 import io.github.salatosik3.minedrift.server.utils.VectorUtils;
 import io.github.salatosik3.minedrift.server.listener.fabric.EventListener;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -131,6 +129,6 @@ public class BoatMovementListener implements EventListener {
     }
 
     private void onBoatCollide(ServerPlayer player, Entity boat) {
-        player.sendOverlayMessage(Component.literal("Collision detected!")); // TODO replace it on another logic like an event invocation or optionally think about a better solution, maybe I should call it not as a collision, maybe I should it process in another way
+        listenerInvoker.invoke(new BoatCollisionEvent(player, boat));
     }
 }

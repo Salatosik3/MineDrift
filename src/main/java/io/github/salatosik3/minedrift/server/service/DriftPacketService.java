@@ -5,7 +5,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 public interface DriftPacketService {
-    void notifyPlayerDrifting(ServerPlayer player, double angle, Entity boat, Vec3 velocity);
+    void notifyDrifting(ServerPlayer player, double angle, Entity vehicle, Vec3 velocity);
 
-    void notifyCollisionDuringDrifting(ServerPlayer player);
+    void notifyCollision(ServerPlayer player, Entity vehicle);
 }
