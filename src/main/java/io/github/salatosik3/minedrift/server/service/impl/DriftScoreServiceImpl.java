@@ -9,6 +9,6 @@ public class DriftScoreServiceImpl implements DriftScoreService {
 
     @Override
     public int calculatePoints(ServerPlayer player, Entity vehicle, Vec3 velocity, double angle) {
-        return 0; // TODO
+        return (int) Math.round(100d * (angle / 360d)); // TODO
     }
 }

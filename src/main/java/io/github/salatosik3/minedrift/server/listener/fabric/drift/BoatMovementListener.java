@@ -7,6 +7,7 @@ import io.github.salatosik3.minedrift.server.utils.VectorUtils;
 import io.github.salatosik3.minedrift.server.listener.fabric.EventListener;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -31,8 +32,9 @@ public class BoatMovementListener implements EventListener {
             EntityTypes.PALE_OAK_BOAT,
             EntityTypes.SPRUCE_BOAT
     );
-    private final Map<UUID, Vec3> lastEntityPositions = new HashMap<>();
+    private static final double MIN_DRIFT_ANGLE = 15;
 
+    private final Map<UUID, Vec3> lastEntityPositions = new HashMap<>();
     private final ListenerInvoker listenerInvoker;
 
     public BoatMovementListener(ListenerInvoker listenerInvoker) {
@@ -116,10 +118,10 @@ public class BoatMovementListener implements EventListener {
             onBoatCollide(player, boat);
         }
 
-        var vl = boat.getLookAngle().multiply(-1, 1, -1);
-        double driftAngle = Math.abs(VectorUtils.calculate2DAngle(vehicleVel, vl));
+        double driftAngle = Math.abs(VectorUtils.calculate2DAngle(vehicleVel, boat.getLookAngle()));
 
-        if (driftAngle >= 30 && driftAngle <= 120 && vehicleVel.length() > 0.1f) {
+        if (driftAngle > MIN_DRIFT_ANGLE && vehicleVel.length() > 0.1f) {
+            player.sendOverlayMessage(Component.literal(String.valueOf(driftAngle)));
             onBoatDrift(player, boat, vehicleVel, driftAngle);
         }
     }
