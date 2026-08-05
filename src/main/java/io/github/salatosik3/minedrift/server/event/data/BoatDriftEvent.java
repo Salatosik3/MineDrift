@@ -5,6 +5,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 public class BoatDriftEvent implements Event {
+    public static final double MIN_DRIFT_ANGLE = 30;
+    public static final double MAX_DRIFT_ANGLE = 120;
+
     private final ServerPlayer serverPlayer;
     private final Entity boat;
     private final Vec3 boatVelocity;

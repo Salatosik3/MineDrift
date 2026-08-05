@@ -7,7 +7,6 @@ import io.github.salatosik3.minedrift.server.utils.VectorUtils;
 import io.github.salatosik3.minedrift.server.listener.fabric.EventListener;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -32,7 +31,6 @@ public class BoatMovementListener implements EventListener {
             EntityTypes.PALE_OAK_BOAT,
             EntityTypes.SPRUCE_BOAT
     );
-    private static final double MIN_DRIFT_ANGLE = 15;
 
     private final Map<UUID, Vec3> lastEntityPositions = new HashMap<>();
     private final ListenerInvoker listenerInvoker;
@@ -105,32 +103,23 @@ public class BoatMovementListener implements EventListener {
         return false;
     }
 
-    private void onVehicleMove(ServerPlayer player, Entity boat, Vec3 vehicleVel) {
+    private void onVehicleMove(ServerPlayer player, Entity boat, Vec3 velocity) {
         if (!BOATS.contains(boat.getType())) {
             return;
         }
 
-        if (vehicleVel.length() < SMALLEST_OPERAPABLE_VALUE) { // This thing is necessary because of how a computer stores floating point numbers
+        if (velocity.length() < SMALLEST_OPERAPABLE_VALUE) { // This thing is necessary because of how a computer stores floating point numbers
             return;
         }
 
-        if (checkCollision(boat, vehicleVel)) {
-            onBoatCollide(player, boat);
+        if (checkCollision(boat, velocity)) {
+            listenerInvoker.invoke(new BoatCollisionEvent(player, boat));
         }
 
-        double driftAngle = Math.abs(VectorUtils.calculate2DAngle(vehicleVel, boat.getLookAngle()));
+        double driftAngle = Math.abs(VectorUtils.calculate2DAngle(velocity, boat.getLookAngle()));
 
-        if (driftAngle > MIN_DRIFT_ANGLE && vehicleVel.length() > 0.1f) {
-            player.sendOverlayMessage(Component.literal(String.valueOf(driftAngle)));
-            onBoatDrift(player, boat, vehicleVel, driftAngle);
+        if (driftAngle > BoatDriftEvent.MIN_DRIFT_ANGLE && driftAngle < BoatDriftEvent.MAX_DRIFT_ANGLE && velocity.length() > 0.1f) {
+            listenerInvoker.invoke(new BoatDriftEvent(player, boat, velocity, driftAngle));
         }
-    }
-
-    private void onBoatDrift(ServerPlayer player, Entity boat, Vec3 boatVel, double driftAngle) {
-        listenerInvoker.invoke(new BoatDriftEvent(player, boat, boatVel, driftAngle));
-    }
-
-    private void onBoatCollide(ServerPlayer player, Entity boat) {
-        listenerInvoker.invoke(new BoatCollisionEvent(player, boat));
     }
 }
