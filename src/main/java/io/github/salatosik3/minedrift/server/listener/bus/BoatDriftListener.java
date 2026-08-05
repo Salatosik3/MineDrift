@@ -14,7 +14,6 @@ public class BoatDriftListener implements Consumer<BoatDriftEvent> {
 
     @Override
     public void accept(BoatDriftEvent boatDriftEvent) {
-        driftPacketService.notifyDrifting(boatDriftEvent.getServerPlayer(), boatDriftEvent.getDriftAngle(),
-                boatDriftEvent.getBoat(), boatDriftEvent.getBoatVelocity());
+        driftPacketService.notifyDrifting(boatDriftEvent.getServerPlayer(), 100);
     }
 }

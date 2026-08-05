@@ -6,11 +6,8 @@ import io.github.salatosik3.minedrift.networking.client.DriftState;
 import io.github.salatosik3.minedrift.networking.client.DriftStatePayload;
 import io.github.salatosik3.minedrift.server.service.DriftPacketService;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +24,7 @@ public class DriftPacketServiceImpl implements DriftPacketService, SimpleTimerTa
     }
 
     @Override
-    public void notifyDrifting(ServerPlayer player, double angle, Entity vehicle, Vec3 velocity) { // TODO I think the responsibility of this class is to just manage when to send a packet for a player. So I think it is unnecessary to pass e.g driftAngle parameter just because I anyways will create another service that will calculate how much points the player has.
+    public void notifyDrifting(ServerPlayer player, int score) {
         long currentTime = System.currentTimeMillis();
 
         DriftData data = playerDriftData.computeIfAbsent(player.getUUID(), _ -> {
@@ -39,14 +36,14 @@ public class DriftPacketServiceImpl implements DriftPacketService, SimpleTimerTa
         data.lastDriftTime = currentTime;
 
         int oldScore = data.lastDriftScore;
-        data.lastDriftScore += 100; // TODO some score system you know... UPD: nope, this class has responsibility to control which packet and when this packet is sent depending on situation
+        data.lastDriftScore = score;
 
         var payload = new DriftPayload(oldScore, data.lastDriftScore);
         ServerPlayNetworking.send(player, payload);
     }
 
     @Override
-    public void notifyCollision(ServerPlayer player, Entity vehicle) {
+    public void notifyCollision(ServerPlayer player) {
         playerDriftData.remove(player.getUUID());
         var payload = new DriftStatePayload(DriftState.FAILED);
         ServerPlayNetworking.send(player, payload);
