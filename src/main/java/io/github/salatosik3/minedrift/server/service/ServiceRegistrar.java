@@ -4,6 +4,7 @@ import io.github.salatosik3.minedrift.misc.Registrar;
 import io.github.salatosik3.minedrift.server.player.PlayerListProvider;
 import io.github.salatosik3.minedrift.server.service.impl.DriftPacketServiceImpl;
 import io.github.salatosik3.minedrift.server.service.impl.DriftScoreServiceImpl;
+import io.github.salatosik3.minedrift.server.service.impl.DriftServiceImpl;
 import io.github.salatosik3.minedrift.server.timer.TimerProvider;
 import net.minecraft.server.players.PlayerList;
 
@@ -18,7 +19,12 @@ public class ServiceRegistrar extends Registrar {
     }
 
     public void registerAll() {
-        register(DriftPacketService.class, new DriftPacketServiceImpl());
-        register(DriftScoreService.class, new DriftScoreServiceImpl());
+        var driftPacketService = new DriftPacketServiceImpl();
+        register(DriftPacketService.class, driftPacketService);
+
+        var driftScoreService = new DriftScoreServiceImpl();
+        register(DriftScoreService.class, driftScoreService);
+
+        register(DriftService.class, new DriftServiceImpl(driftScoreService, driftPacketService, timerProvider.getTimer(), playerListProvider.getPlayerList()));
     }
 }

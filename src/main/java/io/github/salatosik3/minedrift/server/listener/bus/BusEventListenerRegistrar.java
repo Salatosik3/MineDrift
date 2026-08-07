@@ -3,6 +3,7 @@ package io.github.salatosik3.minedrift.server.listener.bus;
 import io.github.salatosik3.minedrift.server.event.EventListenerRegistrar;
 import io.github.salatosik3.minedrift.server.service.DriftPacketService;
 import io.github.salatosik3.minedrift.server.service.DriftScoreService;
+import io.github.salatosik3.minedrift.server.service.DriftService;
 import io.github.salatosik3.minedrift.server.service.ServiceRegistrar;
 
 public class BusEventListenerRegistrar {
@@ -15,6 +16,6 @@ public class BusEventListenerRegistrar {
     }
 
     public void registerAll() {
-        registrar.register(new DriftListener(serviceRegistrar.get(DriftPacketService.class), serviceRegistrar.get(DriftScoreService.class)));
+        registrar.register(new DriftListener(serviceRegistrar.get(DriftService.class)));
     }
 }

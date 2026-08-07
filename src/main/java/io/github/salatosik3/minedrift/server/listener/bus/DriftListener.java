@@ -7,16 +7,15 @@ import io.github.salatosik3.minedrift.server.event.data.BoatDriftEvent;
 import io.github.salatosik3.minedrift.server.event.data.Event;
 import io.github.salatosik3.minedrift.server.service.DriftPacketService;
 import io.github.salatosik3.minedrift.server.service.DriftScoreService;
+import io.github.salatosik3.minedrift.server.service.DriftService;
 
 import java.util.List;
 
 public class DriftListener implements BusEventListener {
-    private final DriftPacketService driftPacketService;
-    private final DriftScoreService driftScoreService;
+    private final DriftService driftService;
 
-    public DriftListener(DriftPacketService driftPacketService, DriftScoreService driftScoreService) {
-        this.driftPacketService = driftPacketService;
-        this.driftScoreService = driftScoreService;
+    public DriftListener(DriftService driftService) {
+        this.driftService = driftService;
     }
 
     @Override
@@ -28,12 +27,10 @@ public class DriftListener implements BusEventListener {
     }
 
     private void notifyServicesWhenBoatDrifts(BoatDriftEvent event) {
-        int points = driftScoreService.calculateScore(event.getBoat(), event.getBoatVelocity(), event.getDriftAngle());
-        driftPacketService.notifyDrifting(event.getServerPlayer(), points);
+        driftService.notifyDrifting(event.getServerPlayer(), event.getBoat(), event.getBoatVelocity(), event.getDriftAngle());
     }
 
     private void notifyServicesWhenBoatCollides(BoatCollisionEvent event) {
-        driftScoreService.resetScore(event.getBoat());
-        driftPacketService.notifyFail(event.getServerPlayer());
+        driftService.notifyCollision(event.getServerPlayer(), event.getBoat());
     }
 }
