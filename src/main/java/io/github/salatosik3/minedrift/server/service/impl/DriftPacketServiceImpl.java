@@ -13,10 +13,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DriftPacketServiceImpl implements DriftPacketService, SimpleTimerTask {
-    public static final long MAX_DRIFT_DELAY = 3000L;
-
     private final PlayerList playerList;
-    private final Map<UUID, DriftData> playerDriftData = new ConcurrentHashMap<>();
 
     public DriftPacketServiceImpl(Timer timer, PlayerList playerList) {
         this.playerList = playerList;
@@ -24,63 +21,22 @@ public class DriftPacketServiceImpl implements DriftPacketService, SimpleTimerTa
     }
 
     @Override
-    public void notifyDrifting(ServerPlayer player, int score) {
-        long currentTime = System.currentTimeMillis();
-
-        DriftData data = playerDriftData.computeIfAbsent(player.getUUID(), _ -> {
-            var payload = new DriftStatePayload(DriftState.STARTED);
-            ServerPlayNetworking.send(player, payload);
-            return new DriftData(currentTime, 0);
-        });
-
-        data.lastDriftTime = currentTime;
-
-        int oldScore = data.lastDriftScore;
-        data.lastDriftScore = score;
-
-        var payload = new DriftPayload(oldScore, data.lastDriftScore);
-        ServerPlayNetworking.send(player, payload);
-    }
-
-    @Override
-    public void notifyCollision(ServerPlayer player) {
-        playerDriftData.remove(player.getUUID());
-        var payload = new DriftStatePayload(DriftState.FAILED);
-        ServerPlayNetworking.send(player, payload);
-    }
-
-    @Override
     public void run() {
-        checkDriftDelays();
+
     }
 
-    private void checkDriftDelays() {
-        final long currentTime = System.currentTimeMillis();
-        Set<UUID> dataToRemove = new HashSet<>();
+    @Override
+    public void notifyDrifting(ServerPlayer player, int score) {
 
-        playerDriftData.forEach((uuid, data) -> {
-            var player = playerList.getPlayer(uuid);
-            if (player == null) {
-                return;
-            }
-
-            long driftDelay = currentTime - data.lastDriftTime;
-            if (driftDelay > MAX_DRIFT_DELAY) {
-                dataToRemove.add(uuid);
-                ServerPlayNetworking.send(player, new DriftStatePayload(DriftState.ENDED));
-            }
-        });
-
-        dataToRemove.forEach(playerDriftData::remove);
     }
 
-    private static class DriftData {
-        long lastDriftTime;
-        int lastDriftScore;
+    @Override
+    public void notifyFail(ServerPlayer player) {
 
-        public DriftData(long lastDriftTime, int lastDriftScore) {
-            this.lastDriftTime = lastDriftTime;
-            this.lastDriftScore = lastDriftScore;
-        }
+    }
+
+    @Override
+    public void notifyEndDrifting(ServerPlayer player) {
+
     }
 }

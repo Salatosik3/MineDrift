@@ -6,24 +6,48 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class DriftScoreServiceImpl implements DriftScoreService {
+public class DriftScoreServiceImpl implements DriftScoreService { // TODO later here some way to save a data has to be added.
 
-    private final Map<UUID, Integer> accumulatedPoints = new HashMap<>();
+    private final Map<BiUUID, Integer> scoreMap = new HashMap<>();
+    private final Map<UUID, Integer> totalScoreMap = new HashMap<>();
 
     @Override
-    public int calculatePoints(Entity vehicle, Vec3 velocity, double angle) {
-        int points = accumulatedPoints.computeIfAbsent(vehicle.getUUID(), _ -> 0);
-        points += (int) Math.round(angle * velocity.length());
-        accumulatedPoints.put(vehicle.getUUID(), points);
-        return points;
+    public int calculateScore(ServerPlayer player, Entity vehicle, Vec3 velocity, double angle) {
+        var biUUID = new BiUUID(player.getUUID(), vehicle.getUUID());
+        int score = scoreMap.computeIfAbsent(biUUID, _ -> 0);
+        score += (int) Math.round(angle * velocity.length());
+        scoreMap.put(biUUID, score);
+        return score;
     }
 
     @Override
-    public void resetPoints(Entity vehicle) {
-        accumulatedPoints.remove(vehicle.getUUID());
+    public void resetScore(ServerPlayer player, Entity vehicle) {
+        var biUUID = new BiUUID(player.getUUID(), vehicle.getUUID());
+        Integer score = scoreMap.get(biUUID);
+
+        if (score == null) {
+            return;
+        }
+
+        int totalScore = totalScoreMap.computeIfAbsent(player.getUUID(), _ -> 0);
+        totalScore += score;
+        totalScoreMap.put(player.getUUID(), totalScore);
+        scoreMap.put(biUUID, 0);
     }
+
+    @Override
+    public int getTotalScore(ServerPlayer player) {
+        Integer totalScore = totalScoreMap.get(player.getUUID());
+
+        if (totalScore == null) {
+            return 0;
+        }
+
+        return totalScore;
+    }
+
+    private record BiUUID(UUID playerUUID, UUID vehicleUUID) {}
 }

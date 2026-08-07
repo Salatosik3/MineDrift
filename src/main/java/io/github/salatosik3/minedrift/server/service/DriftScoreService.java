@@ -5,7 +5,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 public interface DriftScoreService {
-    int calculatePoints(Entity vehicle, Vec3 velocity, double angle);
+    int calculateScore(ServerPlayer player, Entity vehicle, Vec3 velocity, double angle);
 
-    void resetPoints(Entity vehicle);
+    void resetScore(ServerPlayer player, Entity vehicle);
+
+    int getTotalScore(ServerPlayer player);
 }

@@ -28,12 +28,12 @@ public class DriftListener implements BusEventListener {
     }
 
     private void notifyServicesWhenBoatDrifts(BoatDriftEvent event) {
-        int points = driftScoreService.calculatePoints(event.getBoat(), event.getBoatVelocity(), event.getDriftAngle());
+        int points = driftScoreService.calculateScore(event.getBoat(), event.getBoatVelocity(), event.getDriftAngle());
         driftPacketService.notifyDrifting(event.getServerPlayer(), points);
     }
 
     private void notifyServicesWhenBoatCollides(BoatCollisionEvent event) {
-        driftScoreService.resetPoints(event.getBoat());
-        driftPacketService.notifyCollision(event.getServerPlayer());
+        driftScoreService.resetScore(event.getBoat());
+        driftPacketService.notifyFail(event.getServerPlayer());
     }
 }
