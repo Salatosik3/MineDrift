@@ -18,7 +18,7 @@ public class ServiceRegistrar extends Registrar {
     }
 
     public void registerAll() {
-        register(DriftPacketService.class, new DriftPacketServiceImpl(timerProvider.getTimer(), playerListProvider.getPlayerList()));
+        register(DriftPacketService.class, new DriftPacketServiceImpl());
         register(DriftScoreService.class, new DriftScoreServiceImpl());
     }
 }

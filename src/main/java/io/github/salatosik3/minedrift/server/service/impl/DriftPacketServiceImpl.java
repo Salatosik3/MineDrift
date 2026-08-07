@@ -12,31 +12,33 @@ import net.minecraft.server.players.PlayerList;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DriftPacketServiceImpl implements DriftPacketService, SimpleTimerTask {
-    private final PlayerList playerList;
+public class DriftPacketServiceImpl implements DriftPacketService {
+    private final Map<UUID, Integer> lastScoreMap = new HashMap<>();
 
-    public DriftPacketServiceImpl(Timer timer, PlayerList playerList) {
-        this.playerList = playerList;
-        timer.scheduleAtFixedRate(this.asTimerTaskClass(), 0, 500);
-    }
-
-    @Override
-    public void run() {
-
+    private void sendStatePayload(ServerPlayer player, DriftState state) {
+        ServerPlayNetworking.send(player, new DriftStatePayload(state));
     }
 
     @Override
     public void notifyDrifting(ServerPlayer player, int score) {
+        int lastScore = lastScoreMap.computeIfAbsent(player.getUUID(), _ -> {
+            sendStatePayload(player, DriftState.STARTED);
+            return 0;
+        });
 
+        ServerPlayNetworking.send(player, new DriftPayload(lastScore, score));
+        lastScoreMap.put(player.getUUID(), score);
     }
 
     @Override
     public void notifyFail(ServerPlayer player) {
-
+        sendStatePayload(player, DriftState.FAILED);
+        lastScoreMap.remove(player.getUUID());
     }
 
     @Override
     public void notifyEndDrifting(ServerPlayer player) {
-
+        sendStatePayload(player, DriftState.ENDED);
+        lastScoreMap.remove(player.getUUID());
     }
 }
