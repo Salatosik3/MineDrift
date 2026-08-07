@@ -14,6 +14,7 @@ import net.minecraft.server.players.PlayerList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO think about cleaning maps/lists in some classes that stores a data depending on player/entity UUIDs (this will be a huge problem with a large amount of players)
 public class MineDrift implements ModInitializer {
 	public static final String MOD_ID = "minedrift";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
