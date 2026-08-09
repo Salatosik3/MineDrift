@@ -66,6 +66,33 @@ public class BoatMovementListener implements EventListener {
         });
     }
 
+    private @Nullable BlockState raytrace(Level level, Vec3 startPosition, Vec3 direction, double maxDistance) {
+        if (direction.length() == 0) {
+            return null;
+        }
+
+        Vec3 positionOffset = direction;
+
+        while(true) {
+            Vec3 offsetBoatPosition = startPosition.add(positionOffset);
+
+            double offsetDistance = offsetBoatPosition.distanceTo(startPosition);
+            if (offsetDistance > maxDistance) {
+                break;
+            }
+
+            BlockState offsetPositionBlockState = level.getBlockState(BlockPos.containing(offsetBoatPosition));
+
+            if (!offsetPositionBlockState.isAir()) {
+                return offsetPositionBlockState;
+            }
+
+            positionOffset = positionOffset.add(direction);
+        }
+
+        return null;
+    }
+
     private long checkTime = 0;
 
     private boolean checkCollision(Entity entity, Vec3 velocity) {
@@ -84,8 +111,12 @@ public class BoatMovementListener implements EventListener {
             double speedFactor = velocity.length() / lastVelocity.length();
 
             if (speedFactor < 0.50) {
-                MineDrift.LOGGER.debug("Collision detected! Speed factor: {}", speedFactor);
-                return true;
+                BlockState raytracedBlockState = raytrace(entity.level(), entity.position(), velocity, 2);
+
+                if (raytracedBlockState != null) {
+                    MineDrift.LOGGER.debug("Collision detected! Speed factor: {}.2f, raytraced block: {}", speedFactor, raytracedBlockState.getBlock().getName());
+                    return true;
+                }
             }
         }
 
