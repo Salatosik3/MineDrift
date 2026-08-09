@@ -93,16 +93,46 @@ public class BoatMovementListener implements EventListener {
         return null;
     }
 
-    private long checkTime = 0;
+    private boolean raytraceMultiDirectionally(Entity entity, Vec3 velocity) {
+        Vec3 direction = velocity.normalize();
+        for (int i = -90; i <= 90; i += 40) {
+            Vec3 rotatedDirection = direction.yRot((float) Math.toRadians(i));
+            BlockState blockState = raytrace(entity.level(), entity.position(), rotatedDirection, entity.getBoundingBox().getSize());
+            if (blockState != null) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-    private boolean checkCollision(Entity entity, Vec3 velocity) {
+    private Vec3 lastLocation = null;
 
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - checkTime > 10 * 50) {
-            checkTime = currentTime;
-        } else {
+    private boolean isLocationTheSameAsPrevious(Entity entity) {
+        if (lastLocation == null) {
+            lastLocation = entity.position();
             return false;
         }
+        Vec3 location = entity.position();
+        return (long) lastLocation.x == (long) location.x &&
+                (long) lastLocation.y == (long) location.y &&
+                (long) lastLocation.z == (long) location.z;
+    }
+
+//    private long checkTime = 0;
+
+    /*
+    It does work not perfect but cool, but it anyway works weird.
+    I think I should try to also check if e.g a coordinate is staying the same and another one is changing, so I can detect if a player just slides by a line of blocks.
+    In general this kind of mechanics needs to research many different situations, there is no single line logic...
+     */
+    private boolean checkCollision(Entity entity, Vec3 velocity) {
+
+//        long currentTime = System.currentTimeMillis();
+//        if (currentTime - checkTime > 5 * 50) {
+//            checkTime = currentTime;
+//        } else {
+//            return false;
+//        }
 
         Vec3 lastVelocity = lastEntityVelocities.computeIfAbsent(entity.getUUID(), _ -> velocity);
         lastEntityVelocities.put(entity.getUUID(), velocity);
@@ -111,10 +141,14 @@ public class BoatMovementListener implements EventListener {
             double speedFactor = velocity.length() / lastVelocity.length();
 
             if (speedFactor < 0.50) {
-                BlockState raytracedBlockState = raytrace(entity.level(), entity.position(), velocity, 2);
 
-                if (raytracedBlockState != null) {
-                    MineDrift.LOGGER.debug("Collision detected! Speed factor: {}.2f, raytraced block: {}", speedFactor, raytracedBlockState.getBlock().getName());
+                boolean isThereBlockInVelocityDirection = raytraceMultiDirectionally(entity, velocity);
+                boolean isLocationsDifferent = !isLocationTheSameAsPrevious(entity);
+
+                MineDrift.LOGGER.debug("isThereBlockInVelocityDirection: {}, isLocationsDifferent: {}", isThereBlockInVelocityDirection, isLocationsDifferent);
+
+                if (isThereBlockInVelocityDirection && isLocationsDifferent) {
+                    MineDrift.LOGGER.debug("Collision detected!");
                     return true;
                 }
             }
