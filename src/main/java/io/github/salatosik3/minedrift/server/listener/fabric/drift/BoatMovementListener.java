@@ -129,10 +129,22 @@ public class BoatMovementListener implements EventListener {
         }
 
         Vec3 currentSlideLoc = entity.position();
-        return false;
+        boolean result = false;
+
+        if (currentSlideLoc.x - lastSlideLoc.x == 0 && currentSlideLoc.z - lastSlideLoc.z != 0) {
+            result = true;
+        } else if(currentSlideLoc.z - lastSlideLoc.z == 0 && currentSlideLoc.x - lastSlideLoc.x != 0) {
+            result = true;
+        }
+
+        lastSlideLoc = currentSlideLoc;
+
+        return result;
     }
 
 //    private long checkTime = 0;
+
+    private int collisionCounter = 0;
 
     /*
     It does work not perfect but cool, but it anyway works weird.
@@ -151,21 +163,26 @@ public class BoatMovementListener implements EventListener {
         Vec3 lastVelocity = lastEntityVelocities.computeIfAbsent(entity.getUUID(), _ -> velocity);
         lastEntityVelocities.put(entity.getUUID(), velocity);
 
-        if (velocity.length() < lastVelocity.length()) {
-            double speedFactor = velocity.length() / lastVelocity.length();
+        if (!isLocationTheSameAsPrevious(entity)) {
+            return false;
+        }
 
-            if (speedFactor < 0.50) {
+//        MineDrift.LOGGER.debug("Locations are different!");
 
-                boolean isThereBlockInVelocityDirection = raytraceMultiDirectionally(entity, velocity);
-                boolean isLocationsDifferent = !isLocationTheSameAsPrevious(entity);
+        if (isEntitySliding(entity)) {
+            MineDrift.LOGGER.debug("The entity is sliding");
+            return true;
+        }
 
-                MineDrift.LOGGER.debug("isThereBlockInVelocityDirection: {}, isLocationsDifferent: {}", isThereBlockInVelocityDirection, isLocationsDifferent);
+        if (velocity.length() > lastVelocity.length()) {
+            return false;
+        }
 
-                if (isThereBlockInVelocityDirection && isLocationsDifferent) {
-                    MineDrift.LOGGER.debug("Collision detected!");
-                    return true;
-                }
-            }
+        double speedFactor = velocity.length() / lastVelocity.length();
+
+        if (speedFactor < 0.60 && raytraceMultiDirectionally(entity, velocity)) {
+            MineDrift.LOGGER.debug("Collision detected! ({})", collisionCounter++);
+            return true;
         }
 
         return false;

@@ -12,6 +12,7 @@ import net.minecraft.world.phys.Vec3;
 import java.util.*;
 
 public class DriftServiceImpl implements DriftService, SimpleTimerTask { // TODO this is fucking suck (and this meme you know)
+    // TODO also add some last state check, it won't spam the same status like FAIL too much
     private final DriftScoreService scoreService;
     private final DriftPacketService packetService;
     private final PlayerList playerList;
