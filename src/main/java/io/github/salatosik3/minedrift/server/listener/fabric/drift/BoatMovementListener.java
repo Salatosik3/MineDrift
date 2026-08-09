@@ -1,5 +1,6 @@
 package io.github.salatosik3.minedrift.server.listener.fabric.drift;
 
+import io.github.salatosik3.minedrift.server.MineDrift;
 import io.github.salatosik3.minedrift.server.event.ListenerInvoker;
 import io.github.salatosik3.minedrift.server.event.data.BoatCollisionEvent;
 import io.github.salatosik3.minedrift.server.event.data.BoatDriftEvent;
@@ -31,9 +32,10 @@ public class BoatMovementListener implements EventListener {
             EntityTypes.PALE_OAK_BOAT,
             EntityTypes.SPRUCE_BOAT
     );
+    private final ListenerInvoker listenerInvoker;
 
     private final Map<UUID, Vec3> lastEntityPositions = new HashMap<>();
-    private final ListenerInvoker listenerInvoker;
+    private final Map<UUID, Vec3> lastEntityVelocities = new HashMap<>();
 
     public BoatMovementListener(ListenerInvoker listenerInvoker) {
         this.listenerInvoker = listenerInvoker;
@@ -64,42 +66,29 @@ public class BoatMovementListener implements EventListener {
         });
     }
 
-    private @Nullable BlockState raytrace(Level level, Vec3 startPosition, Vec3 direction, double maxDistance) {
-        if (direction.length() == 0) {
-            return null;
-        }
-
-        Vec3 positionOffset = direction;
-
-        while(true) {
-            Vec3 offsetBoatPosition = startPosition.add(positionOffset);
-
-            double offsetDistance = offsetBoatPosition.distanceTo(startPosition);
-            if (offsetDistance > maxDistance) {
-                break;
-            }
-
-            BlockState offsetPositionBlockState = level.getBlockState(BlockPos.containing(offsetBoatPosition));
-
-            if (!offsetPositionBlockState.isAir()) {
-                return offsetPositionBlockState;
-            }
-
-            positionOffset = positionOffset.add(direction);
-        }
-
-        return null;
-    }
+    private long checkTime = 0;
 
     private boolean checkCollision(Entity entity, Vec3 velocity) {
-        Vec3 direction = velocity.normalize();
-        for (int i = -90; i <= 90; i += 40) {
-            Vec3 rotatedDirection = direction.yRot((float) Math.toRadians(i));
-            BlockState blockState = raytrace(entity.level(), entity.position(), rotatedDirection, entity.getBoundingBox().getSize());
-            if (blockState != null) {
+
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - checkTime > 10 * 50) {
+            checkTime = currentTime;
+        } else {
+            return false;
+        }
+
+        Vec3 lastVelocity = lastEntityVelocities.computeIfAbsent(entity.getUUID(), _ -> velocity);
+        lastEntityVelocities.put(entity.getUUID(), velocity);
+
+        if (velocity.length() < lastVelocity.length()) {
+            double speedFactor = velocity.length() / lastVelocity.length();
+
+            if (speedFactor < 0.50) {
+                MineDrift.LOGGER.debug("Collision detected! Speed factor: {}", speedFactor);
                 return true;
             }
         }
+
         return false;
     }
 
