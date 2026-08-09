@@ -113,9 +113,23 @@ public class BoatMovementListener implements EventListener {
             return false;
         }
         Vec3 location = entity.position();
-        return (long) lastLocation.x == (long) location.x &&
+        boolean areSame = (long) lastLocation.x == (long) location.x &&
                 (long) lastLocation.y == (long) location.y &&
                 (long) lastLocation.z == (long) location.z;
+        lastLocation = location;
+        return areSame;
+    }
+
+    private Vec3 lastSlideLoc = null;
+
+    private boolean isEntitySliding(Entity entity) {
+        if (lastSlideLoc == null) {
+            lastSlideLoc = entity.position();
+            return false;
+        }
+
+        Vec3 currentSlideLoc = entity.position();
+        return false;
     }
 
 //    private long checkTime = 0;
