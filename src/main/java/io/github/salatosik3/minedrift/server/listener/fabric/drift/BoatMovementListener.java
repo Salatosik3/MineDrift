@@ -7,6 +7,7 @@ import io.github.salatosik3.minedrift.server.event.data.BoatDriftEvent;
 import io.github.salatosik3.minedrift.server.utils.VectorUtils;
 import io.github.salatosik3.minedrift.server.listener.fabric.EventListener;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -36,6 +37,7 @@ public class BoatMovementListener implements EventListener {
 
     private final Map<UUID, Vec3> lastEntityPositions = new HashMap<>();
     private final Map<UUID, Vec3> lastEntityVelocities = new HashMap<>();
+    private final Map<UUID, Long> lastCollisionCheckTimeMap = new HashMap<>();
 
     public BoatMovementListener(ListenerInvoker listenerInvoker) {
         this.listenerInvoker = listenerInvoker;
@@ -58,7 +60,7 @@ public class BoatMovementListener implements EventListener {
                 if (lastPosVec != null) {
                     var velocity = posVec.subtract(lastPosVec);
                     velocity = VectorUtils.nullifyNearZeroValues(velocity, SMALLEST_OPERAPABLE_VALUE);
-                    onVehicleMove(player, vehicle, velocity);
+                    onVehicleMove(player, vehicle, velocity, lastPosVec);
                 }
 
                 lastEntityPositions.put(vehicle.getUUID(), posVec);
@@ -95,7 +97,7 @@ public class BoatMovementListener implements EventListener {
 
     private boolean raytraceMultiDirectionally(Entity entity, Vec3 velocity) {
         Vec3 direction = velocity.normalize();
-        for (int i = -90; i <= 90; i += 40) {
+        for (int i = -90; i <= 90; i += 20) {
             Vec3 rotatedDirection = direction.yRot((float) Math.toRadians(i));
             BlockState blockState = raytrace(entity.level(), entity.position(), rotatedDirection, entity.getBoundingBox().getSize());
             if (blockState != null) {
@@ -105,74 +107,46 @@ public class BoatMovementListener implements EventListener {
         return false;
     }
 
-    private Vec3 lastLocation = null;
-
-    private boolean isLocationTheSameAsPrevious(Entity entity) {
-        if (lastLocation == null) {
-            lastLocation = entity.position();
-            return false;
-        }
-        Vec3 location = entity.position();
-        boolean areSame = (long) lastLocation.x == (long) location.x &&
-                (long) lastLocation.y == (long) location.y &&
-                (long) lastLocation.z == (long) location.z;
-        lastLocation = location;
-        return areSame;
+    private boolean isLocationTheSameAsPrevious(Vec3 actualLocation, Vec3 lastLocation) {
+        return (long) lastLocation.x == (long) actualLocation.x &&
+                (long) lastLocation.y == (long) actualLocation.y &&
+                (long) lastLocation.z == (long) actualLocation.z;
     }
 
-    private Vec3 lastSlideLoc = null;
-
-    private boolean isEntitySliding(Entity entity) {
-        if (lastSlideLoc == null) {
-            lastSlideLoc = entity.position();
-            return false;
-        }
-
-        Vec3 currentSlideLoc = entity.position();
-        boolean result = false;
-
-        if (currentSlideLoc.x - lastSlideLoc.x == 0 && currentSlideLoc.z - lastSlideLoc.z != 0) {
-            result = true;
-        } else if(currentSlideLoc.z - lastSlideLoc.z == 0 && currentSlideLoc.x - lastSlideLoc.x != 0) {
-            result = true;
-        }
-
-        lastSlideLoc = currentSlideLoc;
-
-        return result;
+    private boolean isEntitySliding(Vec3 actualLocation, Vec3 lastLocation) {
+        return (actualLocation.x - lastLocation.x == 0 && actualLocation.z - lastLocation.z != 0)
+                || (actualLocation.z - lastLocation.z == 0 && actualLocation.x - lastLocation.x != 0);
     }
 
-//    private long checkTime = 0;
+    private boolean checkCollision(Entity entity, Vec3 velocity, Vec3 lastLocation) {
 
-    private int collisionCounter = 0;
-
-    /*
-    It does work not perfect but cool, but it anyway works weird.
-    I think I should try to also check if e.g a coordinate is staying the same and another one is changing, so I can detect if a player just slides by a line of blocks.
-    In general this kind of mechanics needs to research many different situations, there is no single line logic...
-     */
-    private boolean checkCollision(Entity entity, Vec3 velocity) {
-
-//        long currentTime = System.currentTimeMillis();
-//        if (currentTime - checkTime > 5 * 50) {
-//            checkTime = currentTime;
-//        } else {
+//        long lastCheckMillis = lastCollisionCheckTimeMap.computeIfAbsent(entity.getUUID(), _ -> System.currentTimeMillis());
+//        long currentTimeMillis = System.currentTimeMillis();
+//        long timePassedSinceLastCheck = currentTimeMillis - lastCheckMillis;
+//
+//        if (timePassedSinceLastCheck < 50 * 2) {
 //            return false;
+//        } else {
+//            lastCollisionCheckTimeMap.put(entity.getUUID(), currentTimeMillis);
 //        }
 
         Vec3 lastVelocity = lastEntityVelocities.computeIfAbsent(entity.getUUID(), _ -> velocity);
         lastEntityVelocities.put(entity.getUUID(), velocity);
 
-        if (!isLocationTheSameAsPrevious(entity)) {
+        Vec3 actualLocation = entity.position();
+        double locationsDifference = Math.abs(lastLocation.length() - actualLocation.length());
+
+        if (locationsDifference > 2) {
             return false;
         }
 
-//        MineDrift.LOGGER.debug("Locations are different!");
-
-        if (isEntitySliding(entity)) {
-            MineDrift.LOGGER.debug("The entity is sliding");
-            return true;
+        if (isLocationTheSameAsPrevious(actualLocation, lastLocation)) {
+            return false;
         }
+
+//        if (isEntitySliding(actualLocation, lastLocation)) {
+//            return true;
+//        }
 
         if (velocity.length() > lastVelocity.length()) {
             return false;
@@ -180,15 +154,23 @@ public class BoatMovementListener implements EventListener {
 
         double speedFactor = velocity.length() / lastVelocity.length();
 
-        if (speedFactor < 0.60 && raytraceMultiDirectionally(entity, velocity)) {
-            MineDrift.LOGGER.debug("Collision detected! ({})", collisionCounter++);
+//        MineDrift.LOGGER.debug(String.valueOf(speedFactor));
+
+        if (speedFactor < 0.980000019071) {
+            MineDrift.LOGGER.debug("It's about collision but");
+
+            if (!raytraceMultiDirectionally(entity, velocity)) {
+                MineDrift.LOGGER.debug("No block ahead...");
+                return false;
+            }
+            MineDrift.LOGGER.debug("It's collision!");
             return true;
         }
 
         return false;
     }
 
-    private void onVehicleMove(ServerPlayer player, Entity boat, Vec3 velocity) {
+    private void onVehicleMove(ServerPlayer player, Entity boat, Vec3 velocity, Vec3 lastLocation) {
         if (!BOATS.contains(boat.getType())) {
             return;
         }
@@ -197,7 +179,7 @@ public class BoatMovementListener implements EventListener {
             return;
         }
 
-        if (checkCollision(boat, velocity)) {
+        if (checkCollision(boat, velocity, lastLocation)) {
             listenerInvoker.invoke(new BoatCollisionEvent(player, boat));
         }
 
