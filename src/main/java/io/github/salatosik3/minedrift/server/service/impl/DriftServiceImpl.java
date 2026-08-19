@@ -11,8 +11,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
-public class DriftServiceImpl implements DriftService, SimpleTimerTask { // TODO this is fucking suck (and this meme you know)
-    // TODO also add some last state check, it won't spam the same status like FAIL too much
+public class DriftServiceImpl implements DriftService, SimpleTimerTask {
     private final DriftScoreService scoreService;
     private final DriftPacketService packetService;
     private final PlayerList playerList;
@@ -34,24 +33,23 @@ public class DriftServiceImpl implements DriftService, SimpleTimerTask { // TODO
             return;
         }
 
+        driftData.state = State.DRIFTING;
+
         int score = scoreService.calculateScore(player, vehicle, velocity, angle);
         packetService.notifyDrifting(player, score);
 
         driftData.lastDriftTimeMillis = System.currentTimeMillis();
     }
 
-    private boolean integerEquals(Vec3 first, Vec3 second) {
-        return Math.round(first.x) == Math.round(second.x) &&
-                Math.round(first.y) == Math.round(second.y) && Math.round(first.z) == Math.round(second.z);
-    }
-
     @Override
     public void notifyCollision(ServerPlayer player, Entity vehicle) {
-        var driftData = driftDataMap.computeIfAbsent(player.getUUID(), _ -> new DriftData(vehicle));
+        var driftData = driftDataMap.get(player.getUUID());
 
-        if (driftData.cooldownTimeMillis != 0) {
+        if (driftData == null || driftData.state != State.DRIFTING || driftData.cooldownTimeMillis != 0) {
             return;
         }
+
+        driftData.state = State.FAILED;
 
         scoreService.resetScore(player, vehicle);
         packetService.notifyFail(player);
@@ -79,10 +77,12 @@ public class DriftServiceImpl implements DriftService, SimpleTimerTask { // TODO
                     scoreService.resetScore(player, driftData.vehicle);
                     driftDataToRemove.add(uuid);
                 }
-            } else {
+            } else if (driftData.cooldownTimeMillis != 0) {
                 long delay = currentTimeMillis - driftData.cooldownTimeMillis;
                 if (delay > 1500L) {
                     driftData.cooldownTimeMillis = 0;
+                    driftData.state = State.NONE;
+                    driftDataToRemove.add(uuid);
                 }
             }
         });
@@ -90,10 +90,17 @@ public class DriftServiceImpl implements DriftService, SimpleTimerTask { // TODO
         driftDataToRemove.forEach(driftDataMap::remove);
     }
 
+    private enum State {
+        NONE,
+        DRIFTING,
+        FAILED
+    }
+
     private static class DriftData {
         long lastDriftTimeMillis = 0;
         long cooldownTimeMillis = 0;
         final Entity vehicle;
+        State state = State.NONE;
 
         public DriftData(Entity vehicle) {
             this.vehicle = vehicle;
