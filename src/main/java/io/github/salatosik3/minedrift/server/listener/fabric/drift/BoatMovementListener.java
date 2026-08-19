@@ -9,6 +9,8 @@ import io.github.salatosik3.minedrift.server.listener.fabric.EventListener;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -18,6 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
+import java.io.PipedOutputStream;
 import java.util.*;
 
 public class BoatMovementListener implements EventListener {
@@ -69,37 +72,38 @@ public class BoatMovementListener implements EventListener {
     }
 
     private @Nullable BlockState raytrace(Level level, Vec3 startPosition, Vec3 direction, double maxDistance) {
-        if (direction.length() == 0) {
+        if (direction.lengthSqr() == 0) {
             return null;
         }
 
-        Vec3 positionOffset = direction;
+        Vec3 currentPos = startPosition;
+        double stepLength = direction.length();
+        double traveledDistance = 0.0;
 
-        while(true) {
-            Vec3 offsetBoatPosition = startPosition.add(positionOffset);
+        while (traveledDistance <= maxDistance) {
+            BlockPos blockPos = BlockPos.containing(currentPos);
+            BlockState state = level.getBlockState(blockPos);
 
-            double offsetDistance = offsetBoatPosition.distanceTo(startPosition);
-            if (offsetDistance > maxDistance) {
-                break;
+            if (!state.isAir()) {
+                return state;
             }
 
-            BlockState offsetPositionBlockState = level.getBlockState(BlockPos.containing(offsetBoatPosition));
-
-            if (!offsetPositionBlockState.isAir()) {
-                return offsetPositionBlockState;
-            }
-
-            positionOffset = positionOffset.add(direction);
+            currentPos = currentPos.add(direction);
+            traveledDistance += stepLength;
         }
 
         return null;
     }
 
     private boolean raytraceMultiDirectionally(Entity entity, Vec3 velocity) {
-        Vec3 direction = velocity.normalize();
-        for (int i = -90; i <= 90; i += 20) {
-            Vec3 rotatedDirection = direction.yRot((float) Math.toRadians(i));
-            BlockState blockState = raytrace(entity.level(), entity.position(), rotatedDirection, entity.getBoundingBox().getSize());
+        Vec3 normalizedVelocity = velocity.normalize();
+        Vec3 startPosition = entity.position().add(0, 0.3, 0);
+
+        for (int i = -70; i <= 70; i += 10) {
+            Vec3 rayDirection = normalizedVelocity.yRot((float) Math.toRadians(i));
+            Vec3 traceStep = rayDirection.scale(0.15);
+
+            BlockState blockState = raytrace(entity.level(), startPosition, traceStep, 1.6);
             if (blockState != null) {
                 return true;
             }
@@ -108,66 +112,56 @@ public class BoatMovementListener implements EventListener {
     }
 
     private boolean isLocationTheSameAsPrevious(Vec3 actualLocation, Vec3 lastLocation) {
-        return (long) lastLocation.x == (long) actualLocation.x &&
-                (long) lastLocation.y == (long) actualLocation.y &&
-                (long) lastLocation.z == (long) actualLocation.z;
+        return actualLocation.distanceToSqr(lastLocation) < 0.000001;
     }
 
     private boolean isEntitySliding(Vec3 actualLocation, Vec3 lastLocation) {
-        return (actualLocation.x - lastLocation.x == 0 && actualLocation.z - lastLocation.z != 0)
-                || (actualLocation.z - lastLocation.z == 0 && actualLocation.x - lastLocation.x != 0);
+        double deltaX = Math.abs(actualLocation.x - lastLocation.x);
+        double deltaZ = Math.abs(actualLocation.z - lastLocation.z);
+        return deltaX < 0.01 && deltaZ > 0.05 || deltaZ < 0.01 && deltaX > 0.05;
     }
 
     private boolean checkCollision(Entity entity, Vec3 velocity, Vec3 lastLocation) {
-
-//        long lastCheckMillis = lastCollisionCheckTimeMap.computeIfAbsent(entity.getUUID(), _ -> System.currentTimeMillis());
-//        long currentTimeMillis = System.currentTimeMillis();
-//        long timePassedSinceLastCheck = currentTimeMillis - lastCheckMillis;
-//
-//        if (timePassedSinceLastCheck < 50 * 2) {
-//            return false;
-//        } else {
-//            lastCollisionCheckTimeMap.put(entity.getUUID(), currentTimeMillis);
-//        }
-
         Vec3 lastVelocity = lastEntityVelocities.computeIfAbsent(entity.getUUID(), _ -> velocity);
         lastEntityVelocities.put(entity.getUUID(), velocity);
 
         Vec3 actualLocation = entity.position();
-        double locationsDifference = Math.abs(lastLocation.length() - actualLocation.length());
-
-        if (locationsDifference > 2) {
-            return false;
-        }
 
         if (isLocationTheSameAsPrevious(actualLocation, lastLocation)) {
             return false;
         }
 
-//        if (isEntitySliding(actualLocation, lastLocation)) {
-//            return true;
-//        }
+        Vec3 horizontalVelocity = new Vec3(velocity.x, 0, velocity.z);
+        Vec3 lastHorizontalVelocity = new Vec3(lastVelocity.x, 0, lastVelocity.z);
 
-        if (velocity.length() > lastVelocity.length()) {
+        if (horizontalVelocity.length() > lastHorizontalVelocity.length()) {
             return false;
         }
 
-        double speedFactor = velocity.length() / lastVelocity.length();
+        double speedFactor = lastHorizontalVelocity.length() > 0
+                ? horizontalVelocity.length() / lastHorizontalVelocity.length()
+                : 1.0;
 
-//        MineDrift.LOGGER.debug(String.valueOf(speedFactor));
-
-        if (speedFactor < 0.980000019071) {
-            MineDrift.LOGGER.debug("It's about collision but");
-
-            if (!raytraceMultiDirectionally(entity, velocity)) {
-                MineDrift.LOGGER.debug("No block ahead...");
-                return false;
-            }
-            MineDrift.LOGGER.debug("It's collision!");
-            return true;
+        if (speedFactor > 0.95) {
+            return false;
         }
 
-        return false;
+        if (!raytraceMultiDirectionally(entity, lastHorizontalVelocity)) {
+            return false;
+        }
+
+        if (isEntitySliding(actualLocation, lastLocation)) {
+            Vec3 movementDir = actualLocation.subtract(lastLocation).normalize();
+
+            if (movementDir.lengthSqr() > 0) {
+                Vec3 startPos = actualLocation.add(0, 0.3, 0);
+                BlockState stateAhead = raytrace(entity.level(), startPos, movementDir.scale(0.15), 1.5);
+                return stateAhead != null;
+            }
+            return false;
+        }
+
+        return true;
     }
 
     private void onVehicleMove(ServerPlayer player, Entity boat, Vec3 velocity, Vec3 lastLocation) {
